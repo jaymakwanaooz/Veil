@@ -1,33 +1,34 @@
 {
-    "expo": {
-        "name": "Veil",
-        "slug": "veil",
-        "version": "1.0.0",
-        "orientation": "portrait",
-        "icon": "./assets/icon.png",
-        "userInterfaceStyle": "dark",
-        "newArchEnabled": true,
-        "splash": {
-            "image": "./assets/splash-icon.png",
-            "resizeMode": "contain",
-            "backgroundColor": "#0D0D1A"
-        },
-        "ios": {
-            "supportsTablet": true,
-            "bundleIdentifier": "com.veil.chat"
-        },
-        "android": {
-            "adaptiveIcon": {
-                "foregroundImage": "./assets/adaptive-icon.png",
-                "backgroundColor": "#0D0D1A"
-            },
-            "package": "com.veil.chat"
-        },
-        "web": {
-            "favicon": "./assets/favicon.png"
-        },
-        "plugins": [
-            "expo-secure-store"
-        ]
-    }
+  "expo": {
+    "name": "Veil",
+    "slug": "veil",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/veil_logo.png",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/veil_logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0D0D1A"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.veil.chat"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/veil_logo.png",
+        "backgroundColor": "#0D0D1A"
+      },
+      "package": "com.veil.chat"
+    },
+    "web": {
+      "favicon": "./assets/veil_logo.png"
+    },
+    "plugins": [
+      "expo-secure-store",
+      "expo-asset"
+    ]
+  }
 }

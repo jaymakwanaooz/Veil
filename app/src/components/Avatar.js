@@ -15,6 +15,7 @@ export default function Avatar({
     size = 48,
     isOnline = false,
     showBorder = true,
+    imageUrl = null,
     style,
 }) {
     // Generate a consistent color based on username
@@ -48,14 +49,18 @@ export default function Avatar({
                     },
                 ]}
             >
-                <Text
-                    style={[
-                        styles.initial,
-                        { fontSize: size * 0.4 },
-                    ]}
-                >
-                    {initial}
-                </Text>
+                {imageUrl ? (
+                    <Image source={{ uri: imageUrl }} style={{ width: size, height: size, borderRadius: size / 2 }} />
+                ) : (
+                    <Text
+                        style={[
+                            styles.initial,
+                            { fontSize: size * 0.4 },
+                        ]}
+                    >
+                        {initial}
+                    </Text>
+                )}
             </View>
 
             {isOnline && (

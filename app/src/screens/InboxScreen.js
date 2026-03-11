@@ -13,12 +13,27 @@ import { useChat } from '../context/ChatContext';
 import { conversationsAPI } from '../api/client';
 import ConversationItem from '../components/ConversationItem';
 import Avatar from '../components/Avatar';
+import * as ImagePicker from 'expo-image-picker';
 import { colors, typography, spacing, borderRadius, shadows } from '../theme';
 
 export default function InboxScreen({ navigation }) {
     const { user, logout, accounts, switchAccount } = useAuth();
     const { conversations, setConversations } = useChat();
     const [refreshing, setRefreshing] = React.useState(false);
+    const [profileImage, setProfileImage] = React.useState(null);
+
+    const pickImage = async () => {
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ['images'],
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 0.5,
+        });
+
+        if (!result.canceled) {
+            setProfileImage(result.assets[0].uri);
+        }
+    };
 
     const fetchConversations = useCallback(async () => {
         try {
@@ -57,10 +72,18 @@ export default function InboxScreen({ navigation }) {
     const renderHeader = () => (
         <View style={styles.header}>
             <View style={styles.headerTop}>
-                <View>
-                    <Text style={styles.greeting}>Hello,</Text>
-                    <Text style={styles.username}>{user?.username || 'User'}</Text>
-                </View>
+                <TouchableOpacity onPress={pickImage} style={styles.profileSection} activeOpacity={0.8}>
+                    <View style={styles.avatarWrapper}>
+                        <Avatar username={user?.username || 'User'} size={50} imageUrl={profileImage} />
+                        <View style={styles.editBadge}>
+                            <Text style={styles.editBadgeText}>✏️</Text>
+                        </View>
+                    </View>
+                    <View>
+                        <Text style={styles.greeting}>Hello,</Text>
+                        <Text style={styles.username}>{user?.username || 'User'}</Text>
+                    </View>
+                </TouchableOpacity>
 
                 <View style={styles.headerActions}>
                     <TouchableOpacity
@@ -114,9 +137,10 @@ export default function InboxScreen({ navigation }) {
                 )}
                 ListHeaderComponent={renderHeader}
                 ListEmptyComponent={renderEmpty}
-                contentContainerStyle={
-                    conversations.length === 0 ? styles.emptyList : undefined
-                }
+                contentContainerStyle={[
+                    { paddingBottom: 120 }, // Always clear the floating tab bar
+                    conversations.length === 0 ? styles.emptyList : undefined,
+                ]}
                 refreshControl={
                     <RefreshControl
                         refreshing={refreshing}
@@ -148,6 +172,31 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         marginBottom: spacing.xl,
+    },
+    profileSection: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: spacing.md,
+    },
+    avatarWrapper: {
+        position: 'relative',
+    },
+    editBadge: {
+        position: 'absolute',
+        bottom: -4,
+        right: -4,
+        backgroundColor: colors.surface,
+        borderRadius: 12,
+        width: 22,
+        height: 22,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 1.5,
+        borderColor: colors.background,
+    },
+    editBadgeText: {
+        fontSize: 10,
+        marginLeft: 1, // small generic optical centering
     },
     greeting: {
         fontSize: typography.size.md,

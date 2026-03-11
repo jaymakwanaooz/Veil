@@ -8,6 +8,7 @@ import {
     ScrollView,
     TouchableOpacity,
     Dimensions,
+    Image,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useAuth } from '../context/AuthContext';
@@ -67,7 +68,7 @@ export default function AuthScreen() {
             >
                 {/* ─── Header ─────────────────────────────────── */}
                 <View style={styles.header}>
-                    <Text style={styles.logo}>🕶️</Text>
+                    <Image source={require('../../assets/veil_logo.png')} style={styles.logo} resizeMode="contain" />
                     <Text style={styles.title}>Veil</Text>
                     <Text style={styles.subtitle}>Anonymous. Encrypted. Yours.</Text>
                 </View>
@@ -197,7 +198,8 @@ const styles = StyleSheet.create({
         marginBottom: spacing.xxxl,
     },
     logo: {
-        fontSize: 60,
+        width: 100,
+        height: 100,
         marginBottom: spacing.md,
     },
     title: {

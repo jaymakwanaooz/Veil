@@ -1,4 +1,4 @@
-# 🕶️ Veil — Secure Anonymous Chat
+# <img src="./assets/veil_logo.png" width="36" align="center" /> Veil — Secure Anonymous Chat
 
 > **Anonymous. Encrypted. Yours.**
 

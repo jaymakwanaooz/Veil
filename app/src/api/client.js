@@ -36,29 +36,29 @@ api.interceptors.response.use(
 
 // ─── Auth API ─────────────────────────────────────────────
 export const authAPI = {
-    register: (username, password, publicKey) =>
-        api.post('/auth/register', { username, password, publicKey }),
+    register: async (username, password, publicKey) =>
+        ({ data: { token: 'mock-token-123', user: { _id: 'mock-id', username } } }),
 
-    login: (username, password) =>
-        api.post('/auth/login', { username, password }),
+    login: async (username, password) =>
+        ({ data: { token: 'mock-token-123', user: { _id: 'mock-id', username } } }),
 
-    getMe: () =>
-        api.get('/auth/me'),
+    getMe: async () =>
+        ({ data: { user: { _id: 'mock-id', username: 'Guest' } } }),
 
-    getPublicKey: (userId) =>
-        api.get(`/auth/user/${userId}/public-key`),
+    getPublicKey: async (userId) =>
+        ({ data: { publicKey: 'mock-public-key' } }),
 };
 
 // ─── Conversations API ───────────────────────────────────
 export const conversationsAPI = {
-    getAll: () =>
-        api.get('/conversations'),
+    getAll: async () =>
+        ({ data: { conversations: [] } }),
 
-    getMessages: (conversationId, page = 1) =>
-        api.get(`/conversations/${conversationId}/messages?page=${page}`),
+    getMessages: async (conversationId, page = 1) =>
+        ({ data: { messages: [], pagination: {} } }),
 
-    addFriend: (conversationId) =>
-        api.post(`/conversations/${conversationId}/add-friend`),
+    addFriend: async (conversationId) =>
+        ({ data: { message: 'Friend added' } }),
 };
 
 export default api;

@@ -1,6 +1,7 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, Image, Platform, Animated, Easing } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { NavigationContainer, DarkTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
@@ -18,13 +19,10 @@ const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 // ─── Tab Icons ─────────────────────────────────────────
-function TabIcon({ label, emoji, focused }) {
+function TabIcon({ label, focused }) {
     return (
-        <View style={styles.tabIconContainer}>
-            <Text style={[styles.tabEmoji, focused && styles.tabEmojiActive]}>
-                {emoji}
-            </Text>
-            <Text style={[styles.tabLabel, focused && styles.tabLabelActive]}>
+        <View style={[styles.tabIconContainer, focused && styles.tabIconContainerActive]}>
+            <Text style={[styles.tabLabel, focused && styles.tabLabelActive]} numberOfLines={1}>
                 {label}
             </Text>
         </View>
@@ -41,6 +39,12 @@ function MainTabs() {
                 tabBarShowLabel: false,
                 tabBarActiveTintColor: colors.primary,
                 tabBarInactiveTintColor: colors.textMuted,
+                tabBarItemStyle: {
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    flex: 1,
+                    height: 80,
+                },
             }}
         >
             <Tab.Screen
@@ -48,7 +52,7 @@ function MainTabs() {
                 component={InboxScreen}
                 options={{
                     tabBarIcon: ({ focused }) => (
-                        <TabIcon label="Inbox" emoji="💬" focused={focused} />
+                        <TabIcon label="Inbox" focused={focused} />
                     ),
                 }}
             />
@@ -57,7 +61,7 @@ function MainTabs() {
                 component={DiscoverScreen}
                 options={{
                     tabBarIcon: ({ focused }) => (
-                        <TabIcon label="Discover" emoji="🌐" focused={focused} />
+                        <TabIcon label="Discover" focused={focused} />
                     ),
                 }}
             />
@@ -100,10 +104,37 @@ function AuthStack() {
 
 // ─── Loading Screen ────────────────────────────────────
 function LoadingScreen() {
+    const rotateAnim = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+        Animated.loop(
+            Animated.timing(rotateAnim, {
+                toValue: 1,
+                duration: 3000,
+                easing: Easing.linear,
+                useNativeDriver: true,
+            })
+        ).start();
+    }, [rotateAnim]);
+
+    const spin = rotateAnim.interpolate({
+        inputRange: [0, 1],
+        outputRange: ['0deg', '360deg'],
+    });
+
     return (
         <View style={styles.loadingContainer}>
-            <Text style={styles.loadingLogo}>🕶️</Text>
-            <Text style={styles.loadingText}>Veil</Text>
+            <View style={styles.loadingWrapper}>
+                <Animated.View style={[styles.loadingGradientContainer, { transform: [{ rotate: spin }] }]}>
+                    <LinearGradient
+                        colors={['#8b5cf6', '#3b82f6', '#ec4899', '#8b5cf6']}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        style={StyleSheet.absoluteFill}
+                    />
+                </Animated.View>
+                <Image source={require('../../assets/veil_logo.png')} style={styles.loadingLogo} resizeMode="contain" />
+            </View>
         </View>
     );
 }
@@ -119,8 +150,9 @@ export default function AppNavigator() {
     return (
         <NavigationContainer
             theme={{
-                dark: true,
+                ...DarkTheme,
                 colors: {
+                    ...DarkTheme.colors,
                     primary: colors.primary,
                     background: colors.background,
                     card: colors.surface,
@@ -138,34 +170,41 @@ export default function AppNavigator() {
 const styles = StyleSheet.create({
     // ─── Tab Bar ─────────────────────────────────────────
     tabBar: {
+        position: 'absolute',
+        bottom: Platform.OS === 'ios' ? 28 : 20,
+        left: 20,
+        right: 20,
+        borderRadius: 28,
         backgroundColor: colors.surface,
-        borderTopColor: colors.divider,
-        borderTopWidth: 1,
-        height: 85,
-        paddingBottom: 20,
-        paddingTop: 10,
-        elevation: 0,
+        borderTopWidth: 0,
+        height: 80,
+        paddingBottom: 0,
+        paddingTop: 0,
+        elevation: 16,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.4,
+        shadowRadius: 12,
     },
     tabIconContainer: {
         alignItems: 'center',
         justifyContent: 'center',
+        minWidth: 120,
+        height: 52,
+        paddingHorizontal: spacing.xl,
+        borderRadius: 26,
     },
-    tabEmoji: {
-        fontSize: 22,
-        marginBottom: 4,
-        opacity: 0.5,
-    },
-    tabEmojiActive: {
-        opacity: 1,
+    tabIconContainerActive: {
+        backgroundColor: colors.primary + '33',
     },
     tabLabel: {
-        fontSize: typography.size.xs,
+        fontSize: typography.size.md,
         color: colors.textMuted,
         fontWeight: typography.weight.medium,
     },
     tabLabelActive: {
         color: colors.primary,
-        fontWeight: typography.weight.semibold,
+        fontWeight: typography.weight.bold,
     },
 
     // ─── Loading ─────────────────────────────────────────
@@ -175,14 +214,22 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    loadingLogo: {
-        fontSize: 80,
-        marginBottom: spacing.lg,
+    loadingWrapper: {
+        width: 140,
+        height: 140,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
-    loadingText: {
-        fontSize: typography.size.xxxl,
-        fontWeight: typography.weight.heavy,
-        color: colors.textPrimary,
-        letterSpacing: typography.letterSpacing.wider,
+    loadingGradientContainer: {
+        position: 'absolute',
+        width: 140,
+        height: 140,
+        borderRadius: 70,
+        overflow: 'hidden',
+    },
+    loadingLogo: {
+        width: 120,
+        height: 120,
+        zIndex: 2,
     },
 });

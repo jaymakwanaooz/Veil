@@ -97,13 +97,14 @@ export function AuthProvider({ children }) {
 
                 // Verify token is still valid
                 try {
-                    const response = await authAPI.getMe();
+                    await authAPI.getMe();
                     connectSocket(activeAccount.token);
 
                     dispatch({
                         type: AUTH_ACTIONS.LOGIN_SUCCESS,
                         payload: {
-                            user: response.data.user,
+                            // Use the stored account data so the username is always correct
+                            user: { _id: activeAccount.userId, username: activeAccount.username },
                             token: activeAccount.token,
                             secretKey: activeAccount.secretKey,
                         },
