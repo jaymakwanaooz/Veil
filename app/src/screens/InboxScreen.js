@@ -6,33 +6,44 @@ import {
     FlatList,
     TouchableOpacity,
     RefreshControl,
+    TextInput,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useAuth } from '../context/AuthContext';
 import { useChat } from '../context/ChatContext';
 import { conversationsAPI } from '../api/client';
 import ConversationItem from '../components/ConversationItem';
-import Avatar from '../components/Avatar';
-import * as ImagePicker from 'expo-image-picker';
 import { colors, typography, spacing, borderRadius, shadows } from '../theme';
+import * as SecureStore from 'expo-secure-store';
 
 export default function InboxScreen({ navigation }) {
-    const { user, logout, accounts, switchAccount } = useAuth();
+    const { user } = useAuth();
     const { conversations, setConversations } = useChat();
     const [refreshing, setRefreshing] = React.useState(false);
-    const [profileImage, setProfileImage] = React.useState(null);
+    const [searchQuery, setSearchQuery] = React.useState('');
+    const [pinnedChats, setPinnedChats] = React.useState([]);
 
-    const pickImage = async () => {
-        let result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ['images'],
-            allowsEditing: true,
-            aspect: [1, 1],
-            quality: 0.5,
-        });
+    useEffect(() => {
+        const loadPinned = async () => {
+            try {
+                const stored = await SecureStore.getItemAsync('pinned_chats');
+                if (stored) setPinnedChats(JSON.parse(stored));
+            } catch (e) { console.log('Failed to load pinned chats'); }
+        };
+        loadPinned();
+    }, []);
 
-        if (!result.canceled) {
-            setProfileImage(result.assets[0].uri);
+    const togglePin = async (chatId) => {
+        let updated;
+        if (pinnedChats.includes(chatId)) {
+            updated = pinnedChats.filter(id => id !== chatId);
+        } else {
+            updated = [...pinnedChats, chatId];
         }
+        setPinnedChats(updated);
+        try {
+            await SecureStore.setItemAsync('pinned_chats', JSON.stringify(updated));
+        } catch (e) { console.log('Failed to save pinned chats'); }
     };
 
     const fetchConversations = useCallback(async () => {
@@ -71,40 +82,19 @@ export default function InboxScreen({ navigation }) {
 
     const renderHeader = () => (
         <View style={styles.header}>
-            <View style={styles.headerTop}>
-                <TouchableOpacity onPress={pickImage} style={styles.profileSection} activeOpacity={0.8}>
-                    <View style={styles.avatarWrapper}>
-                        <Avatar username={user?.username || 'User'} size={50} imageUrl={profileImage} />
-                        <View style={styles.editBadge}>
-                            <Text style={styles.editBadgeText}>✏️</Text>
-                        </View>
-                    </View>
-                    <View>
-                        <Text style={styles.greeting}>Hello,</Text>
-                        <Text style={styles.username}>{user?.username || 'User'}</Text>
-                    </View>
-                </TouchableOpacity>
 
-                <View style={styles.headerActions}>
-                    <TouchableOpacity
-                        style={styles.headerButton}
-                        onPress={() => navigation.navigate('AccountSwitcher')}
-                    >
-                        <Text style={styles.headerButtonIcon}>👤</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={styles.headerButton}
-                        onPress={logout}
-                    >
-                        <Text style={styles.headerButtonIcon}>🚪</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
-
-            {/* ─── Search Bar (decorative) ────────────────── */}
+            {/* ─── Search Bar ───────────────────────────────── */}
             <View style={styles.searchBar}>
                 <Text style={styles.searchIcon}>🔍</Text>
-                <Text style={styles.searchPlaceholder}>Search conversations...</Text>
+                <TextInput 
+                    style={styles.searchInput}
+                    placeholder="Search conversations..."
+                    placeholderTextColor={colors.textMuted}
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                />
             </View>
 
             <Text style={styles.sectionTitle}>Messages</Text>
@@ -121,18 +111,45 @@ export default function InboxScreen({ navigation }) {
         </View>
     );
 
+    const filteredAndSortedConversations = React.useMemo(() => {
+        let filtered = conversations;
+        if (searchQuery) {
+            const query = searchQuery.toLowerCase();
+            filtered = conversations.filter(conversation => {
+                const otherUser = conversation.participants?.find(p => p._id !== user?._id);
+                const name = conversation.type === 'anonymous' ? 'Stranger' : (otherUser?.username || '');
+                return name.toLowerCase().includes(query) || 
+                       (conversation.lastMessage?.text || '').toLowerCase().includes(query);
+            });
+        }
+        
+        return filtered.sort((a, b) => {
+            const aPinned = pinnedChats.includes(a._id);
+            const bPinned = pinnedChats.includes(b._id);
+            if (aPinned && !bPinned) return -1;
+            if (!aPinned && bPinned) return 1;
+            
+            // Fallback to timestamp sort
+            const tA = new Date(a.lastMessage?.timestamp || 0).getTime();
+            const tB = new Date(b.lastMessage?.timestamp || 0).getTime();
+            return tB - tA;
+        });
+    }, [conversations, searchQuery, pinnedChats, user]);
+
     return (
         <View style={styles.container}>
             <StatusBar style="light" />
 
             <FlatList
-                data={conversations}
+                data={filteredAndSortedConversations}
                 keyExtractor={(item) => item._id}
                 renderItem={({ item }) => (
                     <ConversationItem
                         conversation={item}
                         currentUserId={user?._id}
                         onPress={handleConversationPress}
+                        onLongPress={() => togglePin(item._id)}
+                        isPinned={pinnedChats.includes(item._id)}
                     />
                 )}
                 ListHeaderComponent={renderHeader}
@@ -167,63 +184,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: spacing.xl,
         paddingBottom: spacing.lg,
     },
-    headerTop: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: spacing.xl,
-    },
-    profileSection: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.md,
-    },
-    avatarWrapper: {
-        position: 'relative',
-    },
-    editBadge: {
-        position: 'absolute',
-        bottom: -4,
-        right: -4,
-        backgroundColor: colors.surface,
-        borderRadius: 12,
-        width: 22,
-        height: 22,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1.5,
-        borderColor: colors.background,
-    },
-    editBadgeText: {
-        fontSize: 10,
-        marginLeft: 1, // small generic optical centering
-    },
-    greeting: {
-        fontSize: typography.size.md,
-        color: colors.textSecondary,
-    },
-    username: {
-        fontSize: typography.size.xxxl,
-        fontWeight: typography.weight.bold,
-        color: colors.textPrimary,
-    },
-    headerActions: {
-        flexDirection: 'row',
-        gap: spacing.sm,
-    },
-    headerButton: {
-        width: 42,
-        height: 42,
-        borderRadius: 21,
-        backgroundColor: colors.surface,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-    headerButtonIcon: {
-        fontSize: 18,
-    },
 
     // ─── Search ──────────────────────────────────────────
     searchBar: {
@@ -241,9 +201,11 @@ const styles = StyleSheet.create({
         fontSize: 16,
         marginRight: spacing.sm,
     },
-    searchPlaceholder: {
-        color: colors.textMuted,
+    searchInput: {
+        flex: 1,
+        color: colors.textPrimary,
         fontSize: typography.size.md,
+        paddingVertical: 0,
     },
 
     sectionTitle: {

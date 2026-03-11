@@ -346,7 +346,7 @@ const styles = StyleSheet.create({
 
     // ─── Center ──────────────────────────────────────────
     center: {
-        flex: 1,
+        paddingVertical: 50, // Added explicit padding to give the button room
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -412,7 +412,7 @@ const styles = StyleSheet.create({
     // ─── Add by Username ───────────────────────────
     addSection: {
         marginHorizontal: spacing.xl,
-        marginBottom: spacing.xl,
+        marginBottom: 32, // Increased gap between this section and the info cards below
         backgroundColor: colors.surface,
         borderRadius: borderRadius.xxl,
         padding: spacing.xl,
@@ -526,7 +526,7 @@ const styles = StyleSheet.create({
         backgroundColor: colors.surface,
         borderRadius: borderRadius.lg,
         padding: spacing.lg,
-        marginBottom: spacing.sm,
+        marginBottom: spacing.md, // Increased gap between individual info cards
         borderWidth: 1,
         borderColor: colors.borderLight,
     },

@@ -12,16 +12,20 @@ import { colors, typography, spacing } from '../theme';
 import AuthScreen from '../screens/AuthScreen';
 import InboxScreen from '../screens/InboxScreen';
 import DiscoverScreen from '../screens/DiscoverScreen';
+import ProfileScreen from '../screens/ProfileScreen';
 import ChatScreen from '../screens/ChatScreen';
 import AccountSwitcherScreen from '../screens/AccountSwitcherScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
+import { Ionicons } from '@expo/vector-icons';
+
 // ─── Tab Icons ─────────────────────────────────────────
-function TabIcon({ label, focused }) {
+function TabIcon({ label, focused, iconName }) {
     return (
-        <View style={[styles.tabIconContainer, focused && styles.tabIconContainerActive]}>
+        <View style={styles.tabIconContainer}>
+            <Ionicons name={iconName} size={24} color={focused ? colors.primary : colors.textMuted} />
             <Text style={[styles.tabLabel, focused && styles.tabLabelActive]} numberOfLines={1}>
                 {label}
             </Text>
@@ -42,8 +46,7 @@ function MainTabs() {
                 tabBarItemStyle: {
                     justifyContent: 'center',
                     alignItems: 'center',
-                    flex: 1,
-                    height: 80,
+                    padding: 0,
                 },
             }}
         >
@@ -52,7 +55,7 @@ function MainTabs() {
                 component={InboxScreen}
                 options={{
                     tabBarIcon: ({ focused }) => (
-                        <TabIcon label="Inbox" focused={focused} />
+                        <TabIcon label="Chats" iconName={focused ? "chatbubbles" : "chatbubbles-outline"} focused={focused} />
                     ),
                 }}
             />
@@ -61,7 +64,16 @@ function MainTabs() {
                 component={DiscoverScreen}
                 options={{
                     tabBarIcon: ({ focused }) => (
-                        <TabIcon label="Discover" focused={focused} />
+                        <TabIcon label="Discover" iconName={focused ? "compass" : "compass-outline"} focused={focused} />
+                    ),
+                }}
+            />
+            <Tab.Screen
+                name="Profile"
+                component={ProfileScreen}
+                options={{
+                    tabBarIcon: ({ focused }) => (
+                        <TabIcon label="Profile" iconName={focused ? "person-circle" : "person-circle-outline"} focused={focused} />
                     ),
                 }}
             />
@@ -174,12 +186,12 @@ const styles = StyleSheet.create({
         bottom: Platform.OS === 'ios' ? 28 : 20,
         left: 20,
         right: 20,
-        borderRadius: 28,
+        height: 64,
+        paddingBottom: 0, // Critical: stops RN safe area logic from pushing tabs up
+        paddingTop: 0,
+        borderRadius: 32,
         backgroundColor: colors.surface,
         borderTopWidth: 0,
-        height: 80,
-        paddingBottom: 0,
-        paddingTop: 0,
         elevation: 16,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 6 },
@@ -189,16 +201,12 @@ const styles = StyleSheet.create({
     tabIconContainer: {
         alignItems: 'center',
         justifyContent: 'center',
-        minWidth: 120,
-        height: 52,
-        paddingHorizontal: spacing.xl,
-        borderRadius: 26,
-    },
-    tabIconContainerActive: {
-        backgroundColor: colors.primary + '33',
+        height: 48, 
+        marginTop: 8,
     },
     tabLabel: {
-        fontSize: typography.size.md,
+        fontSize: 10,
+        marginTop: 4,
         color: colors.textMuted,
         fontWeight: typography.weight.medium,
     },

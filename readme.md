@@ -2,7 +2,9 @@
 
 > **Anonymous. Encrypted. Yours.**
 
-A highly secure, end-to-end encrypted anonymous chat application built with React Native (Expo) and Node.js.
+A highly secure, end-to-end encrypted anonymous chat application built with React Native (Expo) and Node.js. 
+
+*UI Design and Layouts for this application were generated and structured using [Google Stitch](https://stitch.google.com).*
 
 ---
 

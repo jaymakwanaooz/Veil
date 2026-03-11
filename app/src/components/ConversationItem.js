@@ -10,6 +10,8 @@ export default function ConversationItem({
     conversation,
     currentUserId,
     onPress,
+    onLongPress,
+    isPinned,
 }) {
     // Get the other participant
     const otherUser = conversation.participants?.find(
@@ -29,6 +31,7 @@ export default function ConversationItem({
         <TouchableOpacity
             style={styles.container}
             onPress={() => onPress(conversation)}
+            onLongPress={onLongPress}
             activeOpacity={0.7}
         >
             <Avatar
@@ -40,7 +43,7 @@ export default function ConversationItem({
             <View style={styles.content}>
                 <View style={styles.header}>
                     <Text style={styles.name} numberOfLines={1}>
-                        {displayName}
+                        {isPinned ? '📌 ' : ''}{displayName}
                     </Text>
                     <Text style={styles.time}>{timeAgo}</Text>
                 </View>
