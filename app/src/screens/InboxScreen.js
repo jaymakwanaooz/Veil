@@ -9,11 +9,13 @@ import {
     TextInput,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
 import { useChat } from '../context/ChatContext';
 import { conversationsAPI } from '../api/client';
 import ConversationItem from '../components/ConversationItem';
-import { colors, typography, spacing, borderRadius, shadows } from '../theme';
+import ConversationFilter from '../components/ConversationFilter';
+import { colors, typography, spacing, borderRadius } from '../theme';
 import * as SecureStore from 'expo-secure-store';
 
 export default function InboxScreen({ navigation }) {
@@ -22,6 +24,7 @@ export default function InboxScreen({ navigation }) {
     const [refreshing, setRefreshing] = React.useState(false);
     const [searchQuery, setSearchQuery] = React.useState('');
     const [pinnedChats, setPinnedChats] = React.useState([]);
+    const [activeFilter, setActiveFilter] = React.useState('All');
 
     useEffect(() => {
         const loadPinned = async () => {
@@ -69,7 +72,6 @@ export default function InboxScreen({ navigation }) {
         const otherUser = conversation.participants?.find(
             (p) => p._id !== user._id
         );
-
         navigation.navigate('Chat', {
             roomId: conversation.roomId,
             conversationId: conversation._id,
@@ -80,13 +82,52 @@ export default function InboxScreen({ navigation }) {
         });
     };
 
-    const renderHeader = () => (
-        <View style={styles.header}>
+    const filteredAndSortedConversations = React.useMemo(() => {
+        let filtered = conversations;
 
-            {/* ─── Search Bar ───────────────────────────────── */}
+        // Apply filter tab
+        if (activeFilter === 'Unread') {
+            filtered = filtered.filter(c => c.unreadCount > 0);
+        } else if (activeFilter === 'Archived') {
+            filtered = filtered.filter(c => c.archived);
+        }
+
+        // Apply search
+        if (searchQuery) {
+            const query = searchQuery.toLowerCase();
+            filtered = filtered.filter(conversation => {
+                const otherUser = conversation.participants?.find(p => p._id !== user?._id);
+                const name = conversation.type === 'anonymous' ? 'Stranger' : (otherUser?.username || '');
+                return name.toLowerCase().includes(query) ||
+                    (conversation.lastMessage?.text || '').toLowerCase().includes(query);
+            });
+        }
+
+        return filtered.sort((a, b) => {
+            const aPinned = pinnedChats.includes(a._id);
+            const bPinned = pinnedChats.includes(b._id);
+            if (aPinned && !bPinned) return -1;
+            if (!aPinned && bPinned) return 1;
+            const tA = new Date(a.lastMessage?.timestamp || 0).getTime();
+            const tB = new Date(b.lastMessage?.timestamp || 0).getTime();
+            return tB - tA;
+        });
+    }, [conversations, searchQuery, pinnedChats, user, activeFilter]);
+
+    const headerElement = (
+        <View>
+            {/* ─── Page Header ─────────────────────── */}
+            <View style={styles.header}>
+                <Text style={styles.pageTitle}>Messages</Text>
+                <TouchableOpacity style={styles.composeBtn} activeOpacity={0.7}>
+                    <Ionicons name="create-outline" size={22} color={colors.primary} />
+                </TouchableOpacity>
+            </View>
+
+            {/* ─── Search Bar ──────────────────────── */}
             <View style={styles.searchBar}>
-                <Text style={styles.searchIcon}>🔍</Text>
-                <TextInput 
+                <Ionicons name="search-outline" size={18} color={colors.textMuted} style={styles.searchIcon} />
+                <TextInput
                     style={styles.searchInput}
                     placeholder="Search conversations..."
                     placeholderTextColor={colors.textMuted}
@@ -97,49 +138,30 @@ export default function InboxScreen({ navigation }) {
                 />
             </View>
 
-            <Text style={styles.sectionTitle}>Messages</Text>
+            {/* ─── Filter Tabs ─────────────────────── */}
+            <ConversationFilter active={activeFilter} onChange={setActiveFilter} />
         </View>
     );
 
     const renderEmpty = () => (
         <View style={styles.emptyContainer}>
             <Text style={styles.emptyIcon}>💬</Text>
-            <Text style={styles.emptyTitle}>No conversations yet</Text>
+            <Text style={styles.emptyTitle}>
+                {activeFilter === 'Unread' ? 'No unread messages' :
+                    activeFilter === 'Archived' ? 'No archived chats' :
+                        'No conversations yet'}
+            </Text>
             <Text style={styles.emptySubtitle}>
-                Go to Discover to find someone to chat with!
+                {activeFilter === 'All'
+                    ? 'Go to Discover to find someone to chat with!'
+                    : 'All caught up!'}
             </Text>
         </View>
     );
 
-    const filteredAndSortedConversations = React.useMemo(() => {
-        let filtered = conversations;
-        if (searchQuery) {
-            const query = searchQuery.toLowerCase();
-            filtered = conversations.filter(conversation => {
-                const otherUser = conversation.participants?.find(p => p._id !== user?._id);
-                const name = conversation.type === 'anonymous' ? 'Stranger' : (otherUser?.username || '');
-                return name.toLowerCase().includes(query) || 
-                       (conversation.lastMessage?.text || '').toLowerCase().includes(query);
-            });
-        }
-        
-        return filtered.sort((a, b) => {
-            const aPinned = pinnedChats.includes(a._id);
-            const bPinned = pinnedChats.includes(b._id);
-            if (aPinned && !bPinned) return -1;
-            if (!aPinned && bPinned) return 1;
-            
-            // Fallback to timestamp sort
-            const tA = new Date(a.lastMessage?.timestamp || 0).getTime();
-            const tB = new Date(b.lastMessage?.timestamp || 0).getTime();
-            return tB - tA;
-        });
-    }, [conversations, searchQuery, pinnedChats, user]);
-
     return (
         <View style={styles.container}>
-            <StatusBar style="light" />
-
+            <StatusBar style="dark" />
             <FlatList
                 data={filteredAndSortedConversations}
                 keyExtractor={(item) => item._id}
@@ -152,10 +174,10 @@ export default function InboxScreen({ navigation }) {
                         isPinned={pinnedChats.includes(item._id)}
                     />
                 )}
-                ListHeaderComponent={renderHeader}
-                ListEmptyComponent={renderEmpty}
+                ListHeaderComponent={headerElement}
+                ListEmptyComponent={renderEmpty()}
                 contentContainerStyle={[
-                    { paddingBottom: 120 }, // Always clear the floating tab bar
+                    { paddingBottom: 120 },
                     conversations.length === 0 ? styles.emptyList : undefined,
                 ]}
                 refreshControl={
@@ -180,9 +202,24 @@ const styles = StyleSheet.create({
 
     // ─── Header ──────────────────────────────────────────
     header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
         paddingTop: 60,
         paddingHorizontal: spacing.xl,
-        paddingBottom: spacing.lg,
+        paddingBottom: spacing.md,
+    },
+    pageTitle: {
+        fontSize: 26,
+        fontWeight: typography.weight.bold,
+        color: colors.textPrimary,
+        letterSpacing: -0.3,
+    },
+    composeBtn: {
+        width: 36,
+        height: 36,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 
     // ─── Search ──────────────────────────────────────────
@@ -190,15 +227,15 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: colors.inputBackground,
-        borderRadius: borderRadius.lg,
+        borderRadius: borderRadius.xxl,
         paddingHorizontal: spacing.lg,
         paddingVertical: spacing.md,
-        marginBottom: spacing.xl,
+        marginHorizontal: spacing.xl,
+        marginBottom: spacing.lg,
         borderWidth: 1,
         borderColor: colors.borderLight,
     },
     searchIcon: {
-        fontSize: 16,
         marginRight: spacing.sm,
     },
     searchInput: {
@@ -206,14 +243,6 @@ const styles = StyleSheet.create({
         color: colors.textPrimary,
         fontSize: typography.size.md,
         paddingVertical: 0,
-    },
-
-    sectionTitle: {
-        fontSize: typography.size.sm,
-        color: colors.textMuted,
-        fontWeight: typography.weight.semibold,
-        letterSpacing: typography.letterSpacing.wider,
-        textTransform: 'uppercase',
     },
 
     // ─── Empty State ─────────────────────────────────────
@@ -236,6 +265,7 @@ const styles = StyleSheet.create({
         fontWeight: typography.weight.bold,
         color: colors.textPrimary,
         marginBottom: spacing.sm,
+        textAlign: 'center',
     },
     emptySubtitle: {
         fontSize: typography.size.md,

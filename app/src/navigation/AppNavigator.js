@@ -1,9 +1,11 @@
-import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Image, Platform, Animated, Easing } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { NavigationContainer, DarkTheme } from '@react-navigation/native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Platform } from 'react-native';
+import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { Ionicons } from '@expo/vector-icons';
+import * as SecureStore from 'expo-secure-store';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAuth } from '../context/AuthContext';
 import { colors, typography, spacing } from '../theme';
@@ -15,19 +17,26 @@ import DiscoverScreen from '../screens/DiscoverScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import ChatScreen from '../screens/ChatScreen';
 import AccountSwitcherScreen from '../screens/AccountSwitcherScreen';
+import OnboardingScreen from '../screens/OnboardingScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
-import { Ionicons } from '@expo/vector-icons';
-
-// ─── Tab Icons ─────────────────────────────────────────
-function TabIcon({ label, focused, iconName }) {
+// ─── Tab Icon — Stitch Circle Style ───────────────────
+function TabIcon({ label, focused, iconName, iconNameOutline }) {
     return (
         <View style={styles.tabIconContainer}>
-            <Ionicons name={iconName} size={24} color={focused ? colors.primary : colors.textMuted} />
+            {focused ? (
+                <View style={styles.tabActiveCircle}>
+                    <Ionicons name={iconName} size={20} color="#fff" />
+                </View>
+            ) : (
+                <View style={styles.tabInactiveCircle}>
+                    <Ionicons name={iconNameOutline} size={20} color={colors.textMuted} />
+                </View>
+            )}
             <Text style={[styles.tabLabel, focused && styles.tabLabelActive]} numberOfLines={1}>
-                {label}
+                {label.toUpperCase()}
             </Text>
         </View>
     );
@@ -35,19 +44,22 @@ function TabIcon({ label, focused, iconName }) {
 
 // ─── Main Tabs ─────────────────────────────────────────
 function MainTabs() {
+    const insets = useSafeAreaInsets();
+    const BASE_HEIGHT = 100;
+    const tabBarHeight = BASE_HEIGHT + insets.bottom;
+
     return (
         <Tab.Navigator
             screenOptions={{
                 headerShown: false,
-                tabBarStyle: styles.tabBar,
+                tabBarStyle: [
+                    styles.tabBar,
+                    { height: tabBarHeight, paddingBottom: insets.bottom },
+                ],
                 tabBarShowLabel: false,
                 tabBarActiveTintColor: colors.primary,
                 tabBarInactiveTintColor: colors.textMuted,
-                tabBarItemStyle: {
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    padding: 0,
-                },
+                tabBarItemStyle: styles.tabBarItem,
             }}
         >
             <Tab.Screen
@@ -55,7 +67,12 @@ function MainTabs() {
                 component={InboxScreen}
                 options={{
                     tabBarIcon: ({ focused }) => (
-                        <TabIcon label="Chats" iconName={focused ? "chatbubbles" : "chatbubbles-outline"} focused={focused} />
+                        <TabIcon
+                            label="Inbox"
+                            iconName="chatbubbles"
+                            iconNameOutline="chatbubbles-outline"
+                            focused={focused}
+                        />
                     ),
                 }}
             />
@@ -64,7 +81,12 @@ function MainTabs() {
                 component={DiscoverScreen}
                 options={{
                     tabBarIcon: ({ focused }) => (
-                        <TabIcon label="Discover" iconName={focused ? "compass" : "compass-outline"} focused={focused} />
+                        <TabIcon
+                            label="Discover"
+                            iconName="compass"
+                            iconNameOutline="compass-outline"
+                            focused={focused}
+                        />
                     ),
                 }}
             />
@@ -73,7 +95,12 @@ function MainTabs() {
                 component={ProfileScreen}
                 options={{
                     tabBarIcon: ({ focused }) => (
-                        <TabIcon label="Profile" iconName={focused ? "person-circle" : "person-circle-outline"} focused={focused} />
+                        <TabIcon
+                            label="Profile"
+                            iconName="person-circle"
+                            iconNameOutline="person-circle-outline"
+                            focused={focused}
+                        />
                     ),
                 }}
             />
@@ -81,7 +108,7 @@ function MainTabs() {
     );
 }
 
-// ─── App Navigator ─────────────────────────────────────
+// ─── App Stack ─────────────────────────────────────────
 function AppStack() {
     return (
         <Stack.Navigator
@@ -106,9 +133,17 @@ function AppStack() {
     );
 }
 
-function AuthStack() {
+// ─── Auth Stack (includes Onboarding for first-time users) ─
+function AuthStack({ showOnboarding }) {
     return (
         <Stack.Navigator screenOptions={{ headerShown: false }}>
+            {showOnboarding && (
+                <Stack.Screen
+                    name="Onboarding"
+                    component={OnboardingScreen}
+                    options={{ animation: 'fade' }}
+                />
+            )}
             <Stack.Screen name="Auth" component={AuthScreen} />
         </Stack.Navigator>
     );
@@ -116,55 +151,40 @@ function AuthStack() {
 
 // ─── Loading Screen ────────────────────────────────────
 function LoadingScreen() {
-    const rotateAnim = useRef(new Animated.Value(0)).current;
-
-    useEffect(() => {
-        Animated.loop(
-            Animated.timing(rotateAnim, {
-                toValue: 1,
-                duration: 3000,
-                easing: Easing.linear,
-                useNativeDriver: true,
-            })
-        ).start();
-    }, [rotateAnim]);
-
-    const spin = rotateAnim.interpolate({
-        inputRange: [0, 1],
-        outputRange: ['0deg', '360deg'],
-    });
-
-    return (
-        <View style={styles.loadingContainer}>
-            <View style={styles.loadingWrapper}>
-                <Animated.View style={[styles.loadingGradientContainer, { transform: [{ rotate: spin }] }]}>
-                    <LinearGradient
-                        colors={['#8b5cf6', '#3b82f6', '#ec4899', '#8b5cf6']}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 1 }}
-                        style={StyleSheet.absoluteFill}
-                    />
-                </Animated.View>
-                <Image source={require('../../assets/veil_logo.png')} style={styles.loadingLogo} resizeMode="contain" />
-            </View>
-        </View>
-    );
+    return <View style={styles.loadingContainer} />;
 }
 
 // ─── Root Navigator ────────────────────────────────────
 export default function AppNavigator() {
     const { isAuthenticated, isLoading } = useAuth();
+    const [onboardingChecked, setOnboardingChecked] = useState(false);
+    const [showOnboarding, setShowOnboarding] = useState(false);
 
-    if (isLoading) {
+    // Check if user has already seen onboarding
+    useEffect(() => {
+        const checkOnboarding = async () => {
+            try {
+                const seen = await SecureStore.getItemAsync('onboarding_seen');
+                setShowOnboarding(!seen);
+            } catch (_) {
+                setShowOnboarding(true); // default to showing if check fails
+            } finally {
+                setOnboardingChecked(true);
+            }
+        };
+        checkOnboarding();
+    }, []);
+
+    if (isLoading || !onboardingChecked) {
         return <LoadingScreen />;
     }
 
     return (
         <NavigationContainer
             theme={{
-                ...DarkTheme,
+                ...DefaultTheme,
                 colors: {
-                    ...DarkTheme.colors,
+                    ...DefaultTheme.colors,
                     primary: colors.primary,
                     background: colors.background,
                     card: colors.surface,
@@ -174,45 +194,69 @@ export default function AppNavigator() {
                 },
             }}
         >
-            {isAuthenticated ? <AppStack /> : <AuthStack />}
+            {isAuthenticated
+                ? <AppStack />
+                : <AuthStack showOnboarding={showOnboarding} />
+            }
         </NavigationContainer>
     );
 }
 
 const styles = StyleSheet.create({
-    // ─── Tab Bar ─────────────────────────────────────────
+    // ─── Tab Bar — rounded card style ───────────────
     tabBar: {
-        position: 'absolute',
-        bottom: Platform.OS === 'ios' ? 28 : 20,
-        left: 20,
-        right: 20,
-        height: 64,
-        paddingBottom: 0, // Critical: stops RN safe area logic from pushing tabs up
-        paddingTop: 0,
-        borderRadius: 32,
         backgroundColor: colors.surface,
         borderTopWidth: 0,
+        borderTopLeftRadius: 24,
+        borderTopRightRadius: 24,
         elevation: 16,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.4,
-        shadowRadius: 12,
+        shadowOffset: { width: 0, height: -4 },
+        shadowOpacity: 0.10,
+        shadowRadius: 16,
+    },
+    tabBarItem: {
+        paddingTop: 10,
+        paddingBottom: 6,
+        minWidth: 80,
     },
     tabIconContainer: {
         alignItems: 'center',
         justifyContent: 'center',
-        height: 48, 
-        marginTop: 8,
+        gap: 2,
+        minWidth: 80,
+        marginTop: 18,
+    },
+    tabActiveCircle: {
+        width: 42,
+        height: 42,
+        borderRadius: 21,
+        backgroundColor: colors.primary,
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: colors.primary,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.35,
+        shadowRadius: 6,
+        elevation: 4,
+    },
+    tabInactiveCircle: {
+        width: 42,
+        height: 42,
+        borderRadius: 21,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     tabLabel: {
         fontSize: 10,
-        marginTop: 4,
         color: colors.textMuted,
-        fontWeight: typography.weight.medium,
+        fontWeight: '600',
+        letterSpacing: 0,
+        textAlign: 'center',
     },
     tabLabelActive: {
         color: colors.primary,
-        fontWeight: typography.weight.bold,
+        fontWeight: '700',
     },
 
     // ─── Loading ─────────────────────────────────────────
@@ -222,22 +266,5 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    loadingWrapper: {
-        width: 140,
-        height: 140,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    loadingGradientContainer: {
-        position: 'absolute',
-        width: 140,
-        height: 140,
-        borderRadius: 70,
-        overflow: 'hidden',
-    },
-    loadingLogo: {
-        width: 120,
-        height: 120,
-        zIndex: 2,
-    },
+
 });

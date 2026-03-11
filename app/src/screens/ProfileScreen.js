@@ -19,7 +19,6 @@ export default function ProfileScreen({ navigation }) {
             aspect: [1, 1],
             quality: 0.5,
         });
-
         if (!result.canceled) {
             setProfileImage(result.assets[0].uri);
         }
@@ -27,13 +26,16 @@ export default function ProfileScreen({ navigation }) {
 
     return (
         <View style={styles.container}>
-            <StatusBar style="light" />
-            
+            <StatusBar style="dark" />
+
+            {/* ─── Header ──────────────────────────────── */}
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>Profile</Text>
             </View>
 
             <ScrollView contentContainerStyle={styles.scrollContent}>
+
+                {/* ─── Avatar + Name + Bio ─────────────── */}
                 <View style={styles.profileSection}>
                     <TouchableOpacity onPress={pickImage} style={styles.avatarContainer} activeOpacity={0.8}>
                         <Avatar username={user?.username || 'User'} size={100} imageUrl={profileImage} />
@@ -41,14 +43,20 @@ export default function ProfileScreen({ navigation }) {
                             <Ionicons name="camera" size={16} color={colors.surface} />
                         </View>
                     </TouchableOpacity>
-                    
+
                     <Text style={styles.greeting}>Hello,</Text>
                     <Text style={styles.username}>{user?.username || 'User'}</Text>
+
+                    {/* ─── Bio subtitle from Stitch design ── */}
+                    <Text style={styles.bio}>Digital explorer &amp; chat enthusiast.</Text>
                 </View>
 
+                {/* ─── Menu Items ──────────────────────── */}
                 <View style={styles.menuSection}>
-                    <TouchableOpacity 
-                        style={styles.menuItem} 
+
+                    {/* Switch Account */}
+                    <TouchableOpacity
+                        style={styles.menuItem}
                         onPress={() => navigation.navigate('AccountSwitcher')}
                         activeOpacity={0.7}
                     >
@@ -59,8 +67,22 @@ export default function ProfileScreen({ navigation }) {
                         <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
                     </TouchableOpacity>
 
-                    <TouchableOpacity 
-                        style={[styles.menuItem, styles.menuItemDestructive]} 
+                    {/* Add Account */}
+                    <TouchableOpacity
+                        style={styles.menuItem}
+                        onPress={() => navigation.navigate('AccountSwitcher')}
+                        activeOpacity={0.7}
+                    >
+                        <View style={styles.menuIconContainer}>
+                            <Ionicons name="person-add-outline" size={20} color={colors.primary} />
+                        </View>
+                        <Text style={styles.menuItemText}>Add Account</Text>
+                        <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+                    </TouchableOpacity>
+
+                    {/* Log Out */}
+                    <TouchableOpacity
+                        style={[styles.menuItem, styles.menuItemDestructive]}
                         onPress={logout}
                         activeOpacity={0.7}
                     >
@@ -87,13 +109,16 @@ const styles = StyleSheet.create({
         paddingBottom: spacing.md,
     },
     headerTitle: {
-        fontSize: typography.size.xxl,
+        fontSize: 26,
         fontWeight: typography.weight.bold,
         color: colors.textPrimary,
+        letterSpacing: -0.3,
     },
     scrollContent: {
-        paddingBottom: 120, // Tab bar padding
+        paddingBottom: 120,
     },
+
+    // ─── Profile Section ─────────────────────────────────
     profileSection: {
         alignItems: 'center',
         paddingVertical: spacing.xxxl,
@@ -124,7 +149,15 @@ const styles = StyleSheet.create({
         fontSize: 32,
         fontWeight: typography.weight.bold,
         color: colors.textPrimary,
+        marginBottom: spacing.sm,
     },
+    bio: {
+        fontSize: typography.size.md,
+        color: colors.textMuted,
+        fontStyle: 'italic',
+    },
+
+    // ─── Menu ────────────────────────────────────────────
     menuSection: {
         paddingHorizontal: spacing.xl,
         marginTop: spacing.xl,
@@ -136,12 +169,14 @@ const styles = StyleSheet.create({
         backgroundColor: colors.surface,
         padding: spacing.lg,
         borderRadius: borderRadius.lg,
+        borderWidth: 1,
+        borderColor: colors.borderLight,
     },
     menuIconContainer: {
         width: 40,
         height: 40,
         borderRadius: 20,
-        backgroundColor: colors.primary + '1A', // 10% opacity primary
+        backgroundColor: colors.primary + '1A',
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: spacing.md,

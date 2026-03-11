@@ -60,7 +60,7 @@ export default function AuthScreen() {
             style={styles.container}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
-            <StatusBar style="light" />
+            <StatusBar style="dark" />
             <ScrollView
                 contentContainerStyle={styles.scrollContent}
                 showsVerticalScrollIndicator={false}

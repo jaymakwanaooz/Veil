@@ -5,48 +5,48 @@
 
 export const colors = {
     // ─── Primary Palette ────────────────────────────────────
-    primary: '#6C5CE7',        // Main violet
-    primaryLight: '#A29BFE',   // Lighter violet
-    primaryDark: '#5A4BD1',    // Darker violet
-    primaryGlow: 'rgba(108, 92, 231, 0.3)', // Glow effect
+    primary: '#42A5F5',        // Stitch primary sky blue
+    primaryLight: '#82C4F8',
+    primaryDark: '#1E88E5',
+    primaryGlow: 'rgba(66, 165, 245, 0.15)', // Glow effect for hero circle
 
     // ─── Background ─────────────────────────────────────────
-    background: '#0D0D1A',     // Deep dark navy
-    backgroundLight: '#1A1A2E', // Slightly lighter
-    backgroundCard: '#16213E',  // Card backgrounds
-    surface: '#1E1E36',        // Surface elements
+    background: '#F0F4F9',     // Off-white / light grey
+    backgroundLight: '#F5F7FA', // Slightly lighter
+    backgroundCard: '#FFFFFF',  // Used for cards
+    surface: '#FFFFFF',        // Pure white surface
 
     // ─── Text ───────────────────────────────────────────────
-    textPrimary: '#FFFFFF',
-    textSecondary: '#B0B3C5',
-    textMuted: '#6C7293',
-    textAccent: '#A29BFE',
+    textPrimary: '#1A2340',    // Near-black/dark navy
+    textSecondary: '#5A6A8A',  // Slate grey
+    textMuted: '#9AA7C0',      // Muted slate
+    textAccent: '#42A5F5',
 
     // ─── Accent Colors ─────────────────────────────────────
-    accent: '#00D2FF',         // Cyan accent
+    accent: '#5DADE2',         // Cyan/light blue accent
     success: '#00E676',
-    warning: '#FFD600',
+    warning: '#F0B429',        // Used in Stitch link icon
     error: '#FF5252',
-    online: '#00E676',
+    online: '#4CAF50',
 
     // ─── Chat Bubbles ──────────────────────────────────────
-    bubbleSent: '#6C5CE7',
-    bubbleReceived: '#1E1E36',
+    bubbleSent: '#42A5F5',
+    bubbleReceived: '#FFFFFF',
     bubbleSentText: '#FFFFFF',
-    bubbleReceivedText: '#E0E0E0',
+    bubbleReceivedText: '#1A2340',
 
     // ─── UI Elements ───────────────────────────────────────
-    border: 'rgba(108, 92, 231, 0.2)',
-    borderLight: 'rgba(255, 255, 255, 0.08)',
-    divider: 'rgba(255, 255, 255, 0.06)',
+    border: '#E2E8F0',
+    borderLight: 'rgba(26, 35, 64, 0.06)',
+    divider: 'rgba(26, 35, 64, 0.08)',
     overlay: 'rgba(0, 0, 0, 0.5)',
-    inputBackground: 'rgba(255, 255, 255, 0.06)',
+    inputBackground: '#F8FAFC',
 
     // ─── Gradients ─────────────────────────────────────────
-    gradientPrimary: ['#6C5CE7', '#A29BFE'],
-    gradientDark: ['#0D0D1A', '#1A1A2E'],
-    gradientCard: ['rgba(108, 92, 231, 0.15)', 'rgba(108, 92, 231, 0.05)'],
-    gradientMatch: ['#6C5CE7', '#00D2FF'],
+    gradientPrimary: ['#42A5F5', '#82C4F8'],
+    gradientDark: ['#1A2340', '#5A6A8A'],
+    gradientCard: ['rgba(66, 165, 245, 0.1)', 'rgba(66, 165, 245, 0.02)'],
+    gradientMatch: ['#42A5F5', '#5DADE2'],
 };
 
 export default colors;

@@ -26,7 +26,8 @@ import {
 } from '../services/socket';
 import { encryptMessage, decryptMessage } from '../crypto/e2ee';
 import ChatBubble from '../components/ChatBubble';
-import Avatar from '../components/Avatar';
+import ChatHeader from '../components/ChatHeader';
+import ChatDateDivider from '../components/ChatDateDivider';
 import { colors, typography, spacing, borderRadius, shadows } from '../theme';
 
 export default function ChatScreen({ route, navigation }) {
@@ -52,22 +53,15 @@ export default function ChatScreen({ route, navigation }) {
     // Join room on mount
     useEffect(() => {
         joinRoom(roomId);
-
-        // Fade in
         Animated.timing(fadeAnim, {
             toValue: 1,
             duration: 300,
             useNativeDriver: true,
         }).start();
-
-        // Load existing messages
         fetchMessages();
-
         return () => {
             leaveRoom(roomId);
-            if (typingTimeoutRef.current) {
-                clearTimeout(typingTimeoutRef.current);
-            }
+            if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
         };
     }, []);
 
@@ -77,40 +71,20 @@ export default function ChatScreen({ route, navigation }) {
         const decrypted = convMessages.map((msg) => {
             try {
                 const isSent = msg.senderId === user._id;
-
-                // Determine keys for decryption
                 const senderPubKey = isSent ? null : partnerPublicKey;
                 const recipientSecKey = secretKey;
 
                 let text;
                 if (isSent) {
-                    // For sent messages, we can't decrypt with the same keys
-                    // We need to store plaintext locally or re-encrypt for self
-                    // Simplified: Show placeholder for own sent messages that we already know
                     text = msg._localPlaintext || '[Encrypted message]';
                 } else {
-                    text = decryptMessage(
-                        msg.ciphertext,
-                        msg.nonce,
-                        senderPubKey,
-                        recipientSecKey
-                    );
+                    text = decryptMessage(msg.ciphertext, msg.nonce, senderPubKey, recipientSecKey);
                 }
-
-                return {
-                    ...msg,
-                    decryptedText: text,
-                    isSent,
-                };
+                return { ...msg, decryptedText: text, isSent };
             } catch (error) {
-                return {
-                    ...msg,
-                    decryptedText: '🔐 Unable to decrypt',
-                    isSent: msg.senderId === user._id,
-                };
+                return { ...msg, decryptedText: '🔐 Unable to decrypt', isSent: msg.senderId === user._id };
             }
         });
-
         setDecryptedMessages(decrypted);
     }, [messages, conversationId]);
 
@@ -125,22 +99,11 @@ export default function ChatScreen({ route, navigation }) {
 
     const handleSend = () => {
         if (!inputText.trim()) return;
-
         try {
             const plaintext = inputText.trim();
-
-            // Encrypt message with partner's public key
-            const { ciphertext, nonce } = encryptMessage(
-                plaintext,
-                partnerPublicKey,
-                secretKey
-            );
-
-            // Send encrypted message via socket
+            const { ciphertext, nonce } = encryptMessage(plaintext, partnerPublicKey, secretKey);
             socketSendMessage(roomId, ciphertext, nonce);
 
-            // Store plaintext locally for display
-            // In production, you'd want a more robust local cache
             const tempMsg = {
                 _id: `local_${Date.now()}`,
                 conversationId,
@@ -152,7 +115,6 @@ export default function ChatScreen({ route, navigation }) {
                 decryptedText: plaintext,
                 isSent: true,
             };
-
             setDecryptedMessages((prev) => [...prev, tempMsg]);
             setInputText('');
             stopTyping(roomId);
@@ -164,17 +126,10 @@ export default function ChatScreen({ route, navigation }) {
 
     const handleTyping = (text) => {
         setInputText(text);
-
         if (text.length > 0) {
             startTyping(roomId);
-
-            // Auto-stop typing after 2 seconds of inactivity
-            if (typingTimeoutRef.current) {
-                clearTimeout(typingTimeoutRef.current);
-            }
-            typingTimeoutRef.current = setTimeout(() => {
-                stopTyping(roomId);
-            }, 2000);
+            if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+            typingTimeoutRef.current = setTimeout(() => stopTyping(roomId), 2000);
         } else {
             stopTyping(roomId);
         }
@@ -186,99 +141,71 @@ export default function ChatScreen({ route, navigation }) {
     };
 
     const handleEndChat = () => {
-        Alert.alert(
-            'End Chat',
-            'Are you sure you want to end this conversation?',
-            [
-                { text: 'Cancel', style: 'cancel' },
-                {
-                    text: 'End',
-                    style: 'destructive',
-                    onPress: () => {
-                        endChat(roomId);
-                        clearActiveChat();
-                        navigation.goBack();
-                    },
+        Alert.alert('End Chat', 'Are you sure you want to end this conversation?', [
+            { text: 'Cancel', style: 'cancel' },
+            {
+                text: 'End',
+                style: 'destructive',
+                onPress: () => {
+                    endChat(roomId);
+                    clearActiveChat();
+                    navigation.goBack();
                 },
-            ]
-        );
+            },
+        ]);
     };
 
     const isPartnerTyping = typingUsers[partnerId];
 
     const renderMessage = ({ item, index }) => {
+        // Determine if we need a date divider before this message
+        const prevItem = index > 0 ? decryptedMessages[index - 1] : null;
+        const prevDate = prevItem ? new Date(prevItem.createdAt).toDateString() : null;
+        const currDate = new Date(item.createdAt).toDateString();
+        const showDivider = !prevItem || prevDate !== currDate;
+
         const showTail =
             index === decryptedMessages.length - 1 ||
             decryptedMessages[index + 1]?.isSent !== item.isSent;
 
+        const isToday = currDate === new Date().toDateString();
+        const isYesterday = currDate === new Date(Date.now() - 86400000).toDateString();
+        const dividerLabel = isToday ? 'Today' : isYesterday ? 'Yesterday' : currDate;
+
         return (
-            <ChatBubble
-                message={item.decryptedText}
-                isSent={item.isSent}
-                timestamp={item.createdAt}
-                showTail={showTail}
-            />
+            <>
+                {showDivider && <ChatDateDivider label={dividerLabel} />}
+                <ChatBubble
+                    message={item.decryptedText}
+                    isSent={item.isSent}
+                    timestamp={item.createdAt}
+                    showTail={showTail}
+                />
+            </>
         );
     };
 
     return (
         <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
-            <StatusBar style="light" />
+            <StatusBar style="dark" />
 
-            {/* ─── Header ─────────────────────────────────── */}
-            <View style={styles.header}>
-                <TouchableOpacity
-                    style={styles.backButton}
-                    onPress={() => navigation.goBack()}
-                >
-                    <Text style={styles.backIcon}>←</Text>
-                </TouchableOpacity>
+            {/* ─── Header ─────────────────────────────── */}
+            <ChatHeader
+                partnerName={partnerName}
+                isTyping={isPartnerTyping}
+                isAnonymous={isAnonymous}
+                friendRequested={friendRequested}
+                onBack={() => navigation.goBack()}
+                onAddFriend={handleAddFriend}
+                onEndChat={handleEndChat}
+            />
 
-                <View style={styles.headerCenter}>
-                    <Avatar username={partnerName} size={36} />
-                    <View style={styles.headerInfo}>
-                        <Text style={styles.headerName}>{partnerName}</Text>
-                        <Text style={styles.headerStatus}>
-                            {isPartnerTyping ? 'typing...' : 'Online'}
-                        </Text>
-                    </View>
-                </View>
-
-                <View style={styles.headerActions}>
-                    {isAnonymous && (
-                        <TouchableOpacity
-                            style={[
-                                styles.addFriendButton,
-                                friendRequested && styles.addFriendButtonRequested,
-                            ]}
-                            onPress={handleAddFriend}
-                            disabled={friendRequested}
-                        >
-                            <Text style={styles.addFriendText}>
-                                {friendRequested ? '✓ Sent' : '+ Add'}
-                            </Text>
-                        </TouchableOpacity>
-                    )}
-
-                    {isAnonymous && (
-                        <TouchableOpacity
-                            style={styles.endButton}
-                            onPress={handleEndChat}
-                        >
-                            <Text style={styles.endButtonIcon}>✕</Text>
-                        </TouchableOpacity>
-                    )}
-                </View>
-            </View>
-
-            {/* ─── E2EE Badge ─────────────────────────────── */}
+            {/* ─── E2EE Badge ─────────────────────────── */}
             <View style={styles.e2eeBadge}>
-                <Text style={styles.e2eeText}>
-                    🔐 Messages are end-to-end encrypted
-                </Text>
+                <Text style={styles.e2eeText}>🔐 Messages are end-to-end encrypted</Text>
             </View>
 
-            {/* ─── Messages ───────────────────────────────── */}
+            {/* ─── Messages ───────────────────────────── */}
             <KeyboardAvoidingView
                 style={styles.chatContainer}
                 behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -297,14 +224,12 @@ export default function ChatScreen({ route, navigation }) {
                     ListEmptyComponent={
                         <View style={styles.emptyChat}>
                             <Text style={styles.emptyChatIcon}>👋</Text>
-                            <Text style={styles.emptyChatText}>
-                                Say hello to {partnerName}!
-                            </Text>
+                            <Text style={styles.emptyChatText}>Say hello to {partnerName}!</Text>
                         </View>
                     }
                 />
 
-                {/* ─── Typing Indicator ───────────────────── */}
+                {/* ─── Typing Indicator ───────────────── */}
                 {isPartnerTyping && (
                     <View style={styles.typingContainer}>
                         <View style={styles.typingBubble}>
@@ -313,8 +238,13 @@ export default function ChatScreen({ route, navigation }) {
                     </View>
                 )}
 
-                {/* ─── Input Bar ──────────────────────────── */}
+                {/* ─── Input Bar ──────────────────────── */}
                 <View style={styles.inputBar}>
+                    {/* + attachment button */}
+                    <TouchableOpacity style={styles.attachBtn} activeOpacity={0.7}>
+                        <Text style={styles.attachIcon}>＋</Text>
+                    </TouchableOpacity>
+
                     <View style={styles.inputContainer}>
                         <TextInput
                             style={styles.textInput}
@@ -329,10 +259,7 @@ export default function ChatScreen({ route, navigation }) {
                     </View>
 
                     <TouchableOpacity
-                        style={[
-                            styles.sendButton,
-                            !inputText.trim() && styles.sendButtonDisabled,
-                        ]}
+                        style={[styles.sendButton, !inputText.trim() && styles.sendButtonDisabled]}
                         onPress={handleSend}
                         disabled={!inputText.trim()}
                     >
@@ -348,79 +275,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: colors.background,
-    },
-
-    // ─── Header ──────────────────────────────────────────
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingTop: 55,
-        paddingBottom: spacing.md,
-        paddingHorizontal: spacing.lg,
-        backgroundColor: colors.surface,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.divider,
-    },
-    backButton: {
-        width: 36,
-        height: 36,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: spacing.sm,
-    },
-    backIcon: {
-        color: colors.textPrimary,
-        fontSize: 24,
-    },
-    headerCenter: {
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    headerInfo: {
-        marginLeft: spacing.md,
-    },
-    headerName: {
-        color: colors.textPrimary,
-        fontSize: typography.size.lg,
-        fontWeight: typography.weight.semibold,
-    },
-    headerStatus: {
-        color: colors.primaryLight,
-        fontSize: typography.size.xs,
-        marginTop: 1,
-    },
-    headerActions: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.sm,
-    },
-    addFriendButton: {
-        backgroundColor: colors.primary,
-        paddingVertical: spacing.xs,
-        paddingHorizontal: spacing.md,
-        borderRadius: borderRadius.full,
-    },
-    addFriendButtonRequested: {
-        backgroundColor: colors.success,
-    },
-    addFriendText: {
-        color: '#fff',
-        fontSize: typography.size.sm,
-        fontWeight: typography.weight.semibold,
-    },
-    endButton: {
-        width: 32,
-        height: 32,
-        borderRadius: 16,
-        backgroundColor: 'rgba(255, 82, 82, 0.15)',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    endButtonIcon: {
-        color: colors.error,
-        fontSize: 14,
-        fontWeight: typography.weight.bold,
     },
 
     // ─── E2EE Badge ──────────────────────────────────────
@@ -440,6 +294,7 @@ const styles = StyleSheet.create({
     },
     messagesList: {
         paddingVertical: spacing.md,
+        paddingHorizontal: spacing.sm,
     },
 
     emptyChat: {
@@ -457,7 +312,7 @@ const styles = StyleSheet.create({
         fontSize: typography.size.md,
     },
 
-    // ─── Typing Indicator ───────────────────────────────
+    // ─── Typing Indicator ────────────────────────────────
     typingContainer: {
         paddingHorizontal: spacing.lg,
         paddingBottom: spacing.xs,
@@ -484,6 +339,23 @@ const styles = StyleSheet.create({
         backgroundColor: colors.surface,
         borderTopWidth: 1,
         borderTopColor: colors.divider,
+        gap: spacing.sm,
+    },
+    attachBtn: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        backgroundColor: colors.inputBackground,
+        borderWidth: 1,
+        borderColor: colors.borderLight,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 4,
+    },
+    attachIcon: {
+        color: colors.textSecondary,
+        fontSize: 20,
+        lineHeight: 22,
     },
     inputContainer: {
         flex: 1,
@@ -491,7 +363,6 @@ const styles = StyleSheet.create({
         borderRadius: borderRadius.xxl,
         paddingHorizontal: spacing.lg,
         paddingVertical: Platform.OS === 'ios' ? spacing.md : spacing.sm,
-        marginRight: spacing.sm,
         maxHeight: 120,
         borderWidth: 1,
         borderColor: colors.borderLight,
@@ -508,11 +379,12 @@ const styles = StyleSheet.create({
         backgroundColor: colors.primary,
         justifyContent: 'center',
         alignItems: 'center',
+        marginBottom: 2,
         ...shadows.sm,
     },
     sendButtonDisabled: {
         backgroundColor: colors.surface,
-        opacity: 0.5,
+        opacity: 0.4,
     },
     sendIcon: {
         color: '#fff',

@@ -17,9 +17,10 @@ export function connectSocket(token) {
         auth: { token },
         transports: ['websocket'],
         reconnection: true,
-        reconnectionAttempts: 10,
-        reconnectionDelay: 1000,
-        timeout: 10000,
+        reconnectionAttempts: 3,
+        reconnectionDelay: 2000,
+        reconnectionDelayMax: 10000,
+        timeout: 8000,
     });
 
     socket.on('connect', () => {
@@ -27,7 +28,8 @@ export function connectSocket(token) {
     });
 
     socket.on('connect_error', (error) => {
-        console.error('🔌 Socket connection error:', error.message);
+        // Silenced — server may not be running in dev mode
+        console.log('🔌 Socket unavailable:', error.message);
     });
 
     socket.on('disconnect', (reason) => {
