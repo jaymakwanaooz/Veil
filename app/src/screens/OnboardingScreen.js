@@ -19,7 +19,7 @@ const { width } = Dimensions.get('window');
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F0F4F9',
+        backgroundColor: colors.background,
     },
 
     // ─── Top Bar ─────────────────────────────────────────
@@ -32,8 +32,8 @@ const styles = StyleSheet.create({
     },
     skipText: {
         fontSize: 15,
-        color: '#42A5F5',
-        fontWeight: '600',
+        color: colors.primary,
+        fontWeight: typography.weight.bold,
     },
 
     // ─── Slides ──────────────────────────────────────────
@@ -52,19 +52,15 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#42A5F5',
-        borderRadius: 14,
-        paddingVertical: 16,
+        backgroundColor: colors.primary,
+        borderRadius: 20,
+        paddingVertical: 18,
         width: '100%',
-        shadowColor: '#42A5F5',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-        elevation: 6,
+        ...shadows.md,
     },
     nextBtnText: {
-        fontSize: 16,
-        fontWeight: '700',
+        fontSize: 18,
+        fontWeight: typography.weight.bold,
         color: '#fff',
     },
 
@@ -79,64 +75,65 @@ const styles = StyleSheet.create({
 
     // Slide 1 — Shield
     shieldOuter: {
-        width: 120,
-        height: 120,
-        borderRadius: 60,
-        backgroundColor: '#5DADE2',
+        width: 140,
+        height: 140,
+        borderRadius: 70,
+        backgroundColor: colors.primary,
         justifyContent: 'center',
         alignItems: 'center',
+        ...shadows.lg,
     },
     keyBadge: {
         position: 'absolute',
-        bottom: 20,
-        right: 48,
-        width: 40,
-        height: 40,
-        borderRadius: 20,
+        bottom: 10,
+        right: width / 2 - 80,
+        width: 48,
+        height: 48,
+        borderRadius: 24,
         backgroundColor: '#fff',
         justifyContent: 'center',
         alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.12,
-        shadowRadius: 4,
-        elevation: 4,
+        ...shadows.md,
     },
 
     // Slide 2 — Username
     avatarCircle: {
-        width: 110,
-        height: 110,
-        borderRadius: 55,
-        backgroundColor: '#B3D9ED',
+        width: 130,
+        height: 130,
+        borderRadius: 65,
+        backgroundColor: colors.primary + '20',
         justifyContent: 'center',
         alignItems: 'center',
+        borderWidth: 2,
+        borderColor: colors.primary + '40',
     },
     idBadge: {
         position: 'absolute',
-        bottom: 22,
-        right: 44,
-        width: 48,
-        height: 36,
-        borderRadius: 8,
-        backgroundColor: '#5DADE2',
+        bottom: 15,
+        right: width / 2 - 75,
+        width: 56,
+        height: 44,
+        borderRadius: 12,
+        backgroundColor: colors.primary,
         justifyContent: 'center',
         alignItems: 'center',
+        ...shadows.md,
     },
 
     // Slide 3 — Matching
     phoneFrame: {
-        width: 100,
-        height: 120,
-        borderRadius: 18,
-        backgroundColor: '#5DADE2',
+        width: 110,
+        height: 140,
+        borderRadius: 24,
+        backgroundColor: colors.primary,
         justifyContent: 'center',
         alignItems: 'center',
+        ...shadows.lg,
     },
     linkIcon: {
         position: 'absolute',
-        bottom: 20,
-        right: 42,
+        bottom: 10,
+        right: width / 2 - 70,
     },
 });
 
@@ -150,49 +147,49 @@ const SLIDES = [
                     <Ionicons name="shield-checkmark" size={72} color="#fff" />
                 </View>
                 <View style={styles.keyBadge}>
-                    <Ionicons name="key" size={20} color="#42A5F5" />
+                    <Ionicons name="key" size={20} color={colors.primary} />
                 </View>
             </View>
         ),
         title: 'E2E Encryption',
-        body: "Your messages and calls are secured with end-to-end encryption. Only you and the person you're communicating with can read or listen to them.",
+        body: "Your messages are secured with military-grade E2EE. Only the intended recipient can decipher your words.",
     },
     {
         key: 'username',
         icon: (
             <View style={styles.illustrationWrap}>
                 <View style={styles.avatarCircle}>
-                    <Ionicons name="person" size={48} color="#5DADE2" />
+                    <Ionicons name="person" size={48} color={colors.primary} />
                 </View>
                 <View style={styles.idBadge}>
-                    <Ionicons name="id-card-outline" size={28} color="#fff" />
+                    <Ionicons name="finger-print-outline" size={28} color="#fff" />
                 </View>
             </View>
         ),
-        title: 'Username-only Auth',
-        body: 'No phone number or email required. Stay anonymous and join conversations instantly with just a unique username.',
+        title: 'Pseudonym Identity',
+        body: 'No phone numbers. No emails. Create a unique alias and jump into the shadows instantly.',
     },
     {
         key: 'matching',
         icon: (
             <View style={styles.illustrationWrap}>
                 <View style={styles.phoneFrame}>
-                    <Ionicons name="phone-portrait-outline" size={56} color="#fff" />
+                    <Ionicons name="repeat-outline" size={56} color="#fff" />
                 </View>
                 <Ionicons
                     name="link"
                     size={30}
-                    color="#F0B429"
+                    color={colors.warning}
                     style={styles.linkIcon}
                 />
             </View>
         ),
         title: 'Anonymous Matching',
-        body: 'Meet new people safely and securely. Your identity remains private until you choose to reveal it to your match.',
+        body: 'Find matches across the network. Stay hidden until both sides choose to reveal their aliases.',
     },
 ];
 
-export default function OnboardingScreen({ navigation }) {
+export default function OnboardingScreen({ navigation, onComplete }) {
     const flatListRef = useRef(null);
     const [activeIndex, setActiveIndex] = useState(0);
 
@@ -213,7 +210,12 @@ export default function OnboardingScreen({ navigation }) {
         try {
             await SecureStore.setItemAsync('onboarding_seen', 'true');
         } catch (_) {}
-        navigation.replace('Auth');
+
+        if (onComplete) {
+            onComplete();
+        } else {
+            navigation.replace('Auth');
+        }
     };
 
     const onViewableItemsChanged = useRef(({ viewableItems }) => {
@@ -226,7 +228,7 @@ export default function OnboardingScreen({ navigation }) {
 
     return (
         <View style={styles.container}>
-            <StatusBar barStyle="dark-content" backgroundColor="#F0F4F9" />
+            <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
 
             {/* ─── Skip ────────────────────────────── */}
             <View style={styles.topBar}>
@@ -235,12 +237,12 @@ export default function OnboardingScreen({ navigation }) {
                         flatListRef.current?.scrollToIndex({ index: activeIndex - 1 });
                         setActiveIndex(activeIndex - 1);
                     }}>
-                        <Ionicons name="arrow-back" size={22} color="#5A6A8A" />
+                        <Ionicons name="chevron-back" size={24} color={colors.textSecondary} />
                     </TouchableOpacity>
                 )}
                 <View style={{ flex: 1 }} />
                 <TouchableOpacity onPress={handleSkip}>
-                    <Text style={styles.skipText}>Skip</Text>
+                    <Text style={styles.skipText}>Skip Intro</Text>
                 </TouchableOpacity>
             </View>
 
@@ -276,7 +278,7 @@ export default function OnboardingScreen({ navigation }) {
                     activeOpacity={0.85}
                 >
                     <Text style={styles.nextBtnText}>
-                        {isLast ? 'Get Started' : 'Next'}
+                        {isLast ? 'Begin Session' : 'Continue'}
                     </Text>
                     {!isLast && (
                         <Ionicons name="arrow-forward" size={18} color="#fff" style={{ marginLeft: 6 }} />

@@ -6,7 +6,9 @@
     "orientation": "portrait",
     "icon": "./assets/veil_logo.png",
     "userInterfaceStyle": "dark",
-    "newArchEnabled": true,
+    "updates": {
+      "enabled": false
+    },
     "splash": {
       "image": "./assets/veil_logo.png",
       "resizeMode": "contain",

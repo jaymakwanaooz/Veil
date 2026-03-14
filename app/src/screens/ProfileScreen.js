@@ -48,7 +48,7 @@ export default function ProfileScreen({ navigation }) {
                     <Text style={styles.username}>{user?.username || 'User'}</Text>
 
                     {/* ─── Bio subtitle from Stitch design ── */}
-                    <Text style={styles.bio}>Digital explorer &amp; chat enthusiast.</Text>
+                    <Text style={styles.bio}>Securing the digital frontier.</Text>
                 </View>
 
                 {/* ─── Menu Items ──────────────────────── */}
@@ -104,15 +104,15 @@ const styles = StyleSheet.create({
         backgroundColor: colors.background,
     },
     header: {
-        paddingTop: Platform.OS === 'ios' ? 60 : 40,
+        paddingTop: Platform.OS === 'ios' ? 60 : 45,
         paddingHorizontal: spacing.xl,
-        paddingBottom: spacing.md,
+        paddingBottom: spacing.lg,
     },
     headerTitle: {
-        fontSize: 26,
-        fontWeight: typography.weight.bold,
+        fontSize: 32,
+        fontWeight: typography.weight.heavy,
         color: colors.textPrimary,
-        letterSpacing: -0.3,
+        letterSpacing: -0.5,
     },
     scrollContent: {
         paddingBottom: 120,
@@ -121,79 +121,91 @@ const styles = StyleSheet.create({
     // ─── Profile Section ─────────────────────────────────
     profileSection: {
         alignItems: 'center',
-        paddingVertical: spacing.xxxl,
+        paddingVertical: spacing.xxl,
+        backgroundColor: colors.surface,
+        marginHorizontal: spacing.xl,
+        borderRadius: 32,
+        borderWidth: 1,
+        borderColor: colors.borderLight,
+        ...shadows.sm,
     },
     avatarContainer: {
         position: 'relative',
-        marginBottom: spacing.lg,
+        marginBottom: spacing.xl,
     },
     editBadge: {
         position: 'absolute',
-        bottom: 0,
-        right: 0,
+        bottom: 2,
+        right: 2,
         backgroundColor: colors.primary,
-        borderRadius: 16,
-        width: 32,
-        height: 32,
+        borderRadius: 18,
+        width: 36,
+        height: 36,
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 3,
-        borderColor: colors.background,
+        borderColor: colors.surface,
+        ...shadows.sm,
     },
     greeting: {
-        fontSize: typography.size.lg,
+        fontSize: 16,
         color: colors.textSecondary,
-        marginBottom: spacing.xs,
+        fontWeight: typography.weight.medium,
+        marginBottom: 2,
     },
     username: {
-        fontSize: 32,
-        fontWeight: typography.weight.bold,
+        fontSize: 28,
+        fontWeight: typography.weight.heavy,
         color: colors.textPrimary,
-        marginBottom: spacing.sm,
+        marginBottom: 8,
     },
     bio: {
-        fontSize: typography.size.md,
+        fontSize: 14,
         color: colors.textMuted,
-        fontStyle: 'italic',
+        fontWeight: typography.weight.medium,
     },
 
     // ─── Menu ────────────────────────────────────────────
     menuSection: {
         paddingHorizontal: spacing.xl,
-        marginTop: spacing.xl,
-        gap: spacing.md,
+        marginTop: spacing.xxl,
+        gap: spacing.lg,
     },
     menuItem: {
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: colors.surface,
-        padding: spacing.lg,
-        borderRadius: borderRadius.lg,
+        padding: spacing.xl,
+        borderRadius: 24,
+        borderWidth: 1,
+        borderColor: colors.borderLight,
+        ...shadows.sm,
+    },
+    menuIconContainer: {
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        backgroundColor: colors.background,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: spacing.lg,
         borderWidth: 1,
         borderColor: colors.borderLight,
     },
-    menuIconContainer: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: colors.primary + '1A',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: spacing.md,
-    },
     menuItemText: {
         flex: 1,
-        fontSize: typography.size.md,
-        fontWeight: typography.weight.medium,
+        fontSize: 16,
+        fontWeight: typography.weight.bold,
         color: colors.textPrimary,
     },
     menuItemDestructive: {
-        backgroundColor: colors.surface,
+        borderColor: colors.error + '20',
     },
     menuIconContainerDestructive: {
-        backgroundColor: '#ff44441A',
+        backgroundColor: colors.error + '08',
+        borderColor: colors.error + '20',
     },
     menuItemTextDestructive: {
-        color: '#ff4444',
+        color: colors.error,
     },
 });

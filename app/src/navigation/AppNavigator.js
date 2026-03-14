@@ -133,17 +133,10 @@ function AppStack() {
     );
 }
 
-// ─── Auth Stack (includes Onboarding for first-time users) ─
-function AuthStack({ showOnboarding }) {
+// ─── Auth Stack — Login/Signup screens ───────────────────
+function AuthStack() {
     return (
         <Stack.Navigator screenOptions={{ headerShown: false }}>
-            {showOnboarding && (
-                <Stack.Screen
-                    name="Onboarding"
-                    component={OnboardingScreen}
-                    options={{ animation: 'fade' }}
-                />
-            )}
             <Stack.Screen name="Auth" component={AuthScreen} />
         </Stack.Navigator>
     );
@@ -175,6 +168,10 @@ export default function AppNavigator() {
         checkOnboarding();
     }, []);
 
+    const handleOnboardingComplete = () => {
+        setShowOnboarding(false);
+    };
+
     if (isLoading || !onboardingChecked) {
         return <LoadingScreen />;
     }
@@ -194,10 +191,19 @@ export default function AppNavigator() {
                 },
             }}
         >
-            {isAuthenticated
-                ? <AppStack />
-                : <AuthStack showOnboarding={showOnboarding} />
-            }
+            {showOnboarding ? (
+                <Stack.Navigator screenOptions={{ headerShown: false }}>
+                    <Stack.Screen name="Onboarding">
+                        {(props) => (
+                            <OnboardingScreen {...props} onComplete={handleOnboardingComplete} />
+                        )}
+                    </Stack.Screen>
+                </Stack.Navigator>
+            ) : isAuthenticated ? (
+                <AppStack />
+            ) : (
+                <AuthStack />
+            )}
         </NavigationContainer>
     );
 }

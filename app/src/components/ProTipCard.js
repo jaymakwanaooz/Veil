@@ -19,7 +19,7 @@ export default function ProTipCard({
         <View style={styles.card}>
             <Ionicons name={icon} size={18} color={colors.primary} style={styles.icon} />
             <View style={styles.textBox}>
-                <Text style={styles.label}>{label}</Text>
+                <Text style={styles.label}>{label.toUpperCase()}</Text>
                 <Text style={styles.body}>{text}</Text>
             </View>
         </View>
@@ -31,29 +31,30 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'flex-start',
         backgroundColor: colors.surface,
-        borderRadius: borderRadius.lg,
-        padding: spacing.lg,
+        borderRadius: 24,
+        padding: spacing.xl,
         borderWidth: 1,
-        borderColor: colors.border,
+        borderColor: colors.borderLight,
         marginHorizontal: spacing.xl,
+        ...shadows.sm,
     },
     icon: {
         marginRight: spacing.md,
-        marginTop: 1,
+        marginTop: 2,
     },
     textBox: {
         flex: 1,
     },
     label: {
-        fontSize: typography.size.xs,
-        fontWeight: typography.weight.bold,
+        fontSize: 10,
+        fontWeight: typography.weight.heavy,
         color: colors.primary,
-        letterSpacing: typography.letterSpacing.wider,
-        marginBottom: 3,
+        letterSpacing: 1.5,
+        marginBottom: 4,
     },
     body: {
-        fontSize: typography.size.sm,
+        fontSize: 13,
         color: colors.textSecondary,
-        lineHeight: 18,
+        lineHeight: 20,
     },
 });

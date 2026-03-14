@@ -39,11 +39,6 @@ export default function AuthScreen() {
             return;
         }
 
-        if (!isLogin && password.length < 6) {
-            setLocalError('Password must be at least 6 characters');
-            return;
-        }
-
         const result = isLogin
             ? await login(username.trim(), password)
             : await register(username.trim(), password);
@@ -68,38 +63,42 @@ export default function AuthScreen() {
             >
                 {/* ─── Header ─────────────────────────────────── */}
                 <View style={styles.header}>
-                    <Image source={require('../../assets/veil_logo.png')} style={styles.logo} resizeMode="contain" />
-                    <Text style={styles.title}>Veil</Text>
-                    <Text style={styles.subtitle}>Anonymous. Encrypted. Yours.</Text>
+                    <View style={styles.logoContainer}>
+                        <Image source={require('../../assets/veil_logo.png')} style={styles.logo} resizeMode="contain" />
+                    </View>
+                    <Text style={styles.title}>VEIL</Text>
+                    <Text style={styles.subtitle}>Secure Anonymous Messaging</Text>
                 </View>
 
                 {/* ─── Form Card ──────────────────────────────── */}
                 <View style={styles.card}>
-                    <Text style={styles.cardTitle}>
-                        {isLogin ? 'Welcome Back' : 'Create Account'}
-                    </Text>
-                    <Text style={styles.cardSubtitle}>
-                        {isLogin
-                            ? 'Enter your credentials to continue'
-                            : 'No email. No phone. Just a username.'}
-                    </Text>
+                    <View style={styles.cardHeader}>
+                        <Text style={styles.cardTitle}>
+                            {isLogin ? 'Login to Veil' : 'Join the Shadows'}
+                        </Text>
+                        <Text style={styles.cardSubtitle}>
+                            {isLogin
+                                ? 'Encrypted credentials required'
+                                : 'No personal data. Just identity.'}
+                        </Text>
+                    </View>
 
                     <Input
                         label="Username"
                         value={username}
                         onChangeText={setUsername}
-                        placeholder="Choose a username"
+                        placeholder="your_alias"
                         autoCapitalize="none"
-                        icon={<Text style={styles.inputIcon}>👤</Text>}
+                        icon={<Feather name="user" size={18} color={colors.textMuted} />}
                     />
 
                     <Input
                         label="Password"
                         value={password}
                         onChangeText={setPassword}
-                        placeholder="Enter password"
+                        placeholder="••••••••"
                         secureTextEntry
-                        icon={<Text style={styles.inputIcon}>🔒</Text>}
+                        icon={<Feather name="lock" size={18} color={colors.textMuted} />}
                     />
 
                     {!isLogin && (
@@ -107,20 +106,21 @@ export default function AuthScreen() {
                             label="Confirm Password"
                             value={confirmPassword}
                             onChangeText={setConfirmPassword}
-                            placeholder="Re-enter password"
+                            placeholder="••••••••"
                             secureTextEntry
-                            icon={<Text style={styles.inputIcon}>🔒</Text>}
+                            icon={<Feather name="shield" size={18} color={colors.textMuted} />}
                         />
                     )}
 
                     {displayError ? (
                         <View style={styles.errorContainer}>
-                            <Text style={styles.errorText}>⚠️ {displayError}</Text>
+                            <Feather name="alert-circle" size={14} color={colors.error} />
+                            <Text style={styles.errorText}>{displayError}</Text>
                         </View>
                     ) : null}
 
                     <Button
-                        title={isLogin ? 'Sign In' : 'Create Account'}
+                        title={isLogin ? 'Sign In' : 'Create Identity'}
                         onPress={handleAuth}
                         loading={isLoading}
                         size="lg"
@@ -135,18 +135,18 @@ export default function AuthScreen() {
                         style={styles.toggleContainer}
                     >
                         <Text style={styles.toggleText}>
-                            {isLogin ? "Don't have an account? " : 'Already have an account? '}
+                            {isLogin ? "New here? " : 'Known identity? '}
                             <Text style={styles.toggleLink}>
-                                {isLogin ? 'Sign Up' : 'Sign In'}
+                                {isLogin ? 'Create Account' : 'Login Proceed'}
                             </Text>
                         </Text>
                     </TouchableOpacity>
                 </View>
 
                 {/* ─── Saved Accounts ─────────────────────────── */}
-                {accounts.length > 0 && (
+                {accounts.length > 0 && isLogin && (
                     <View style={styles.savedSection}>
-                        <Text style={styles.savedTitle}>Saved Accounts</Text>
+                        <Text style={styles.savedTitle}>SECURE VAULT</Text>
                         {accounts.map((account) => (
                             <TouchableOpacity
                                 key={account.userId}
@@ -160,9 +160,9 @@ export default function AuthScreen() {
                                 </View>
                                 <View style={styles.savedInfo}>
                                     <Text style={styles.savedUsername}>{account.username}</Text>
-                                    <Text style={styles.savedHint}>Tap to switch</Text>
+                                    <Text style={styles.savedHint}>Ready for session</Text>
                                 </View>
-                                <Text style={styles.switchIcon}>→</Text>
+                                <Feather name="corner-down-right" size={18} color={colors.primary} />
                             </TouchableOpacity>
                         ))}
                     </View>
@@ -170,9 +170,9 @@ export default function AuthScreen() {
 
                 {/* ─── E2EE Notice ────────────────────────────── */}
                 <View style={styles.notice}>
-                    <Text style={styles.noticeIcon}>🔐</Text>
+                    <Feather name="shield" size={14} color={colors.textMuted} />
                     <Text style={styles.noticeText}>
-                        End-to-end encrypted. Your keys are generated locally and never leave this device.
+                        End-to-end encrypted. All data is routed through secure tunnels.
                     </Text>
                 </View>
             </ScrollView>
@@ -195,67 +195,75 @@ const styles = StyleSheet.create({
     // ─── Header ──────────────────────────────────────────
     header: {
         alignItems: 'center',
-        marginBottom: spacing.xxxl,
+        marginBottom: spacing.xxl,
+    },
+    logoContainer: {
+        backgroundColor: colors.surface,
+        borderRadius: 24,
+        padding: spacing.md,
+        ...shadows.sm,
+        marginBottom: spacing.lg,
     },
     logo: {
-        width: 100,
-        height: 100,
-        marginBottom: spacing.md,
+        width: 60,
+        height: 60,
     },
     title: {
-        fontSize: typography.size.display,
+        fontSize: 32,
         fontWeight: typography.weight.heavy,
         color: colors.textPrimary,
-        letterSpacing: typography.letterSpacing.wider,
+        letterSpacing: 2,
     },
     subtitle: {
-        fontSize: typography.size.md,
+        fontSize: typography.size.sm,
         color: colors.textMuted,
-        marginTop: spacing.sm,
-        letterSpacing: typography.letterSpacing.wide,
+        marginTop: 4,
+        fontWeight: typography.weight.medium,
     },
 
     // ─── Card ────────────────────────────────────────────
     card: {
         backgroundColor: colors.surface,
-        borderRadius: borderRadius.xxl,
-        padding: spacing.xxl,
+        borderRadius: 32,
+        padding: spacing.xl,
         borderWidth: 1,
-        borderColor: colors.border,
-        ...shadows.md,
+        borderColor: colors.borderLight,
+        ...shadows.lg,
+    },
+    cardHeader: {
+        marginBottom: spacing.xl,
     },
     cardTitle: {
-        fontSize: typography.size.xxl,
+        fontSize: 24,
         fontWeight: typography.weight.bold,
         color: colors.textPrimary,
-        marginBottom: spacing.xs,
+        marginBottom: 4,
     },
     cardSubtitle: {
         fontSize: typography.size.sm,
         color: colors.textSecondary,
-        marginBottom: spacing.xxl,
-    },
-
-    inputIcon: {
-        fontSize: 18,
     },
 
     errorContainer: {
-        backgroundColor: 'rgba(255, 82, 82, 0.1)',
-        borderRadius: borderRadius.md,
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: colors.error + '10',
+        borderRadius: borderRadius.lg,
         padding: spacing.md,
         marginBottom: spacing.lg,
         borderWidth: 1,
-        borderColor: 'rgba(255, 82, 82, 0.2)',
+        borderColor: colors.error + '20',
     },
     errorText: {
         color: colors.error,
         fontSize: typography.size.sm,
-        textAlign: 'center',
+        marginLeft: spacing.sm,
+        flex: 1,
     },
 
     authButton: {
-        marginTop: spacing.sm,
+        marginTop: spacing.md,
+        borderRadius: borderRadius.xl,
     },
 
     toggleContainer: {
@@ -268,7 +276,7 @@ const styles = StyleSheet.create({
     },
     toggleLink: {
         color: colors.primary,
-        fontWeight: typography.weight.semibold,
+        fontWeight: typography.weight.bold,
     },
 
     // ─── Saved Accounts ─────────────────────────────────
@@ -276,71 +284,63 @@ const styles = StyleSheet.create({
         marginTop: spacing.xxxl,
     },
     savedTitle: {
-        fontSize: typography.size.sm,
+        fontSize: 12,
         color: colors.textMuted,
-        fontWeight: typography.weight.semibold,
-        letterSpacing: typography.letterSpacing.wider,
-        textTransform: 'uppercase',
+        fontWeight: typography.weight.heavy,
+        letterSpacing: 1.5,
         marginBottom: spacing.md,
+        paddingHorizontal: spacing.sm,
     },
     savedAccount: {
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: colors.surface,
-        borderRadius: borderRadius.lg,
+        borderRadius: borderRadius.xxl,
         padding: spacing.lg,
-        marginBottom: spacing.sm,
+        marginBottom: spacing.md,
         borderWidth: 1,
-        borderColor: colors.border,
+        borderColor: colors.borderLight,
+        ...shadows.sm,
     },
     savedAvatar: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
+        width: 44,
+        height: 44,
+        borderRadius: 22,
         backgroundColor: colors.primary,
         justifyContent: 'center',
         alignItems: 'center',
     },
     savedAvatarText: {
         color: '#fff',
-        fontSize: typography.size.lg,
+        fontSize: 20,
         fontWeight: typography.weight.bold,
     },
     savedInfo: {
         flex: 1,
-        marginLeft: spacing.md,
+        marginLeft: spacing.lg,
     },
     savedUsername: {
         color: colors.textPrimary,
         fontSize: typography.size.md,
-        fontWeight: typography.weight.medium,
+        fontWeight: typography.weight.bold,
     },
     savedHint: {
         color: colors.textMuted,
-        fontSize: typography.size.xs,
+        fontSize: 11,
         marginTop: 2,
-    },
-    switchIcon: {
-        color: colors.primary,
-        fontSize: 20,
-        fontWeight: typography.weight.bold,
     },
 
     // ─── Notice ──────────────────────────────────────────
     notice: {
         flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'center',
         marginTop: spacing.xxxl,
-        paddingHorizontal: spacing.lg,
-    },
-    noticeIcon: {
-        fontSize: 16,
-        marginRight: spacing.sm,
+        opacity: 0.6,
     },
     noticeText: {
-        flex: 1,
         color: colors.textMuted,
-        fontSize: typography.size.xs,
-        lineHeight: 16,
+        fontSize: 12,
+        marginLeft: spacing.sm,
     },
 });
