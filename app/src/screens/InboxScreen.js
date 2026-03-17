@@ -1,4 +1,5 @@
 import React, { useEffect, useCallback } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
     View,
     Text,
@@ -15,12 +16,13 @@ import { useChat } from '../context/ChatContext';
 import { conversationsAPI } from '../api/client';
 import ConversationItem from '../components/ConversationItem';
 import ConversationFilter from '../components/ConversationFilter';
-import { colors, typography, spacing, borderRadius } from '../theme';
+import { colors, typography, spacing, borderRadius, shadows } from '../theme';
 import * as SecureStore from 'expo-secure-store';
 
 export default function InboxScreen({ navigation }) {
     const { user } = useAuth();
     const { conversations, setConversations } = useChat();
+    const insets = useSafeAreaInsets();
     const [refreshing, setRefreshing] = React.useState(false);
     const [searchQuery, setSearchQuery] = React.useState('');
     const [pinnedChats, setPinnedChats] = React.useState([]);
@@ -161,7 +163,7 @@ export default function InboxScreen({ navigation }) {
 
     return (
         <View style={styles.container}>
-            <StatusBar style="dark" />
+            <StatusBar style="light" />
             <FlatList
                 data={filteredAndSortedConversations}
                 keyExtractor={(item) => item._id}
@@ -205,7 +207,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingTop: Platform.OS === 'ios' ? 60 : 40,
+        paddingTop: 16,
         paddingHorizontal: spacing.xl,
         paddingBottom: spacing.lg,
     },

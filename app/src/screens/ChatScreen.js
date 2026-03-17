@@ -7,7 +7,6 @@ import {
     TextInput,
     TouchableOpacity,
     KeyboardAvoidingView,
-    Platform,
     Alert,
     Animated,
 } from 'react-native';
@@ -187,7 +186,7 @@ export default function ChatScreen({ route, navigation }) {
 
     return (
         <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
-            <StatusBar style="dark" />
+            <StatusBar style="light" />
 
             {/* ─── Header ─────────────────────────────── */}
             <ChatHeader
@@ -208,7 +207,7 @@ export default function ChatScreen({ route, navigation }) {
             {/* ─── Messages ───────────────────────────── */}
             <KeyboardAvoidingView
                 style={styles.chatContainer}
-                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            behavior="padding"
                 keyboardVerticalOffset={90}
             >
                 <FlatList
@@ -370,7 +369,7 @@ const styles = StyleSheet.create({
         backgroundColor: colors.background,
         borderRadius: 24,
         paddingHorizontal: 16,
-        paddingVertical: Platform.OS === 'ios' ? 12 : 8,
+        paddingVertical: 10,
         maxHeight: 120,
         borderWidth: 1.5,
         borderColor: colors.borderLight,

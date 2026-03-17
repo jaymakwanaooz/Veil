@@ -10,7 +10,6 @@ import {
     TextInput,
     ActivityIndicator,
     KeyboardAvoidingView,
-    Platform,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
@@ -66,9 +65,9 @@ export default function DiscoverScreen({ navigation }) {
     return (
         <KeyboardAvoidingView
             style={styles.container}
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            behavior="height"
         >
-            <StatusBar style="dark" />
+            <StatusBar style="light" />
 
             <ScrollView
                 showsVerticalScrollIndicator={false}

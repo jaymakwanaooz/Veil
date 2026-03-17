@@ -4,10 +4,10 @@ import {
     Text,
     StyleSheet,
     TouchableOpacity,
-    Platform,
     Modal,
     Pressable,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Avatar from './Avatar';
 import { colors, typography, spacing, borderRadius } from '../theme';
@@ -33,6 +33,7 @@ export default function ChatHeader({
     onEndChat,
 }) {
     const [menuVisible, setMenuVisible] = useState(false);
+    const insets = useSafeAreaInsets();
 
     return (
         <View style={styles.header}>
@@ -132,13 +133,12 @@ const styles = StyleSheet.create({
     header: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingTop: Platform.OS === 'ios' ? 60 : 45,
+        paddingTop: 12,
         paddingBottom: spacing.lg,
         paddingHorizontal: spacing.xl,
         backgroundColor: colors.surface,
         borderBottomWidth: 1,
         borderColor: colors.borderLight,
-        ...shadows.sm,
     },
 
     // ─── Back ────────────────────────────────────────
@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0,0,0,0.3)',
         justifyContent: 'flex-start',
         alignItems: 'flex-end',
-        paddingTop: Platform.OS === 'ios' ? 120 : 100,
+        paddingTop: 110,
         paddingRight: 20,
     },
     dropdown: {

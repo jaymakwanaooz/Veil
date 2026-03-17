@@ -2,7 +2,24 @@ node_modules/
 .expo/
 dist/
 *.log
-.env
+.env*
 .DS_Store
 *.tgz
 web-build/
+
+# Android
+app/android/.gradle/
+app/android/build/
+app/android/local.properties
+app/android/.kotlin/
+*.keystore
+*.jks
+
+# IDE
+.idea/
+.vscode/
+
+# Build artifacts
+build/
+bin/
+obj/

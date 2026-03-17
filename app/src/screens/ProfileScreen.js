@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons, Feather } from '@expo/vector-icons';
 
 import { useAuth } from '../context/AuthContext';
 import Avatar from '../components/Avatar';
-import { colors, typography, spacing, borderRadius } from '../theme';
+import { colors, typography, spacing, borderRadius, shadows } from '../theme';
 
 export default function ProfileScreen({ navigation }) {
     const { user, logout } = useAuth();
     const [profileImage, setProfileImage] = useState(null);
+    const insets = useSafeAreaInsets();
 
     const pickImage = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
@@ -26,7 +28,7 @@ export default function ProfileScreen({ navigation }) {
 
     return (
         <View style={styles.container}>
-            <StatusBar style="dark" />
+            <StatusBar style="light" />
 
             {/* ─── Header ──────────────────────────────── */}
             <View style={styles.header}>
@@ -104,7 +106,7 @@ const styles = StyleSheet.create({
         backgroundColor: colors.background,
     },
     header: {
-        paddingTop: Platform.OS === 'ios' ? 60 : 45,
+        paddingTop: 16,
         paddingHorizontal: spacing.xl,
         paddingBottom: spacing.lg,
     },

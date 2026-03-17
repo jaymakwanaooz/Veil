@@ -4,7 +4,6 @@ import {
     Text,
     StyleSheet,
     KeyboardAvoidingView,
-    Platform,
     ScrollView,
     TouchableOpacity,
     Dimensions,
@@ -53,9 +52,9 @@ export default function AuthScreen() {
     return (
         <KeyboardAvoidingView
             style={styles.container}
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            behavior="height"
         >
-            <StatusBar style="dark" />
+            <StatusBar style="light" />
             <ScrollView
                 contentContainerStyle={styles.scrollContent}
                 showsVerticalScrollIndicator={false}
@@ -64,7 +63,7 @@ export default function AuthScreen() {
                 {/* ─── Header ─────────────────────────────────── */}
                 <View style={styles.header}>
                     <View style={styles.logoContainer}>
-                        <Image source={require('../../assets/veil_logo.png')} style={styles.logo} resizeMode="contain" />
+                        <Image source={require('../../assets/veil_logo_v2.png')} style={styles.logo} resizeMode="contain" />
                     </View>
                     <Text style={styles.title}>VEIL</Text>
                     <Text style={styles.subtitle}>Secure Anonymous Messaging</Text>

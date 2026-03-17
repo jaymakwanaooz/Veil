@@ -4,13 +4,13 @@
     "slug": "veil",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/veil_logo.png",
+    "icon": "./assets/veil_logo_v2.png",
     "userInterfaceStyle": "dark",
     "updates": {
       "enabled": false
     },
     "splash": {
-      "image": "./assets/veil_logo.png",
+      "image": "./assets/veil_logo_v2.png",
       "resizeMode": "contain",
       "backgroundColor": "#0D0D1A"
     },
@@ -20,13 +20,13 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/veil_logo.png",
+        "foregroundImage": "./assets/veil_logo_v2.png",
         "backgroundColor": "#0D0D1A"
       },
       "package": "com.veil.chat"
     },
     "web": {
-      "favicon": "./assets/veil_logo.png"
+      "favicon": "./assets/veil_logo_v2.png"
     },
     "plugins": [
       "expo-secure-store",

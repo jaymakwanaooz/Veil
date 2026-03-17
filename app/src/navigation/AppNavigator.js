@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Platform } from 'react-native';
+import React, { useEffect, useState, useRef } from 'react';
+import { View, Text, StyleSheet, Animated, Image } from 'react-native';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -142,9 +142,41 @@ function AuthStack() {
     );
 }
 
-// ─── Loading Screen ────────────────────────────────────
+// ─── Loading / Splash Screen ──────────────────────────
 function LoadingScreen() {
-    return <View style={styles.loadingContainer} />;
+    const glowAnim = useRef(new Animated.Value(0)).current;
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+        Animated.parallel([
+            Animated.timing(fadeAnim, {
+                toValue: 1, duration: 700, useNativeDriver: true,
+            }),
+            Animated.loop(
+                Animated.sequence([
+                    Animated.timing(glowAnim, { toValue: 1, duration: 1500, useNativeDriver: true }),
+                    Animated.timing(glowAnim, { toValue: 0.3, duration: 1500, useNativeDriver: true }),
+                ])
+            ),
+        ]).start();
+    }, []);
+
+    const glowOpacity = glowAnim.interpolate({ inputRange: [0, 1], outputRange: [0.3, 1] });
+
+    return (
+        <View style={styles.loadingContainer}>
+            <Animated.View style={[styles.logoGlow, { opacity: glowOpacity }]} />
+            <Animated.View style={{ opacity: fadeAnim, alignItems: 'center' }}>
+                <Image
+                    source={require('../../assets/veil_logo_v2.png')}
+                    style={styles.splashLogo}
+                    resizeMode="contain"
+                />
+                <Text style={styles.splashTitle}>VEIL</Text>
+                <Text style={styles.splashSubtitle}>Secure Anonymous Messaging</Text>
+            </Animated.View>
+        </View>
+    );
 }
 
 // ─── Root Navigator ────────────────────────────────────
@@ -265,12 +297,37 @@ const styles = StyleSheet.create({
         fontWeight: '700',
     },
 
-    // ─── Loading ─────────────────────────────────────────
+    // ─── Loading / Splash ─────────────────────────────────
     loadingContainer: {
         flex: 1,
         backgroundColor: colors.background,
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    logoGlow: {
+        position: 'absolute',
+        width: 200,
+        height: 200,
+        borderRadius: 100,
+        backgroundColor: colors.primary,
+        opacity: 0.12,
+    },
+    splashLogo: {
+        width: 100,
+        height: 100,
+        marginBottom: 20,
+    },
+    splashTitle: {
+        fontSize: 36,
+        fontWeight: '800',
+        color: '#FFFFFF',
+        letterSpacing: 6,
+    },
+    splashSubtitle: {
+        fontSize: 13,
+        color: colors.textSecondary,
+        marginTop: 8,
+        letterSpacing: 0.5,
     },
 
 });

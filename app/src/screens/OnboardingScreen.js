@@ -6,13 +6,13 @@ import {
     FlatList,
     TouchableOpacity,
     Dimensions,
-    Platform,
     StatusBar,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as SecureStore from 'expo-secure-store';
 import OnboardingSlide from '../components/OnboardingSlide';
 import OnboardingDots from '../components/OnboardingDots';
+import { colors, typography, spacing, borderRadius, shadows } from '../theme';
 
 const { width } = Dimensions.get('window');
 
@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
     topBar: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingTop: Platform.OS === 'ios' ? 56 : 36,
+        paddingTop: 48,
         paddingHorizontal: 24,
         paddingBottom: 12,
     },
@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
     // ─── Footer ──────────────────────────────────────────
     footer: {
         paddingHorizontal: 28,
-        paddingBottom: Platform.OS === 'ios' ? 44 : 28,
+        paddingBottom: 32,
         gap: 24,
         alignItems: 'center',
     },

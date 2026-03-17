@@ -1,52 +1,53 @@
 /**
  * Veil Design System — Color Palette
- * Inspired by the reference design's purple/violet aesthetic
+ * Dark theme with electric blue accent, matching Stitch design
  */
 
 export const colors = {
     // ─── Primary Palette ────────────────────────────────────
-    primary: '#5bb0fb',        // Stitch primary sky blue
-    primaryLight: '#8cd4ff',
-    primaryDark: '#2b8dfa',
-    primaryGlow: 'rgba(91, 176, 251, 0.15)', // Glow effect for hero circle
+    primary: '#5BB0FB',        // Electric sky blue
+    primaryLight: '#82C8FC',
+    primaryDark: '#3A9DFA',
+    primaryGlow: 'rgba(91, 176, 251, 0.15)',
 
-    // ─── Background ─────────────────────────────────────────
-    background: '#F0F4F9',     // Off-white / light grey
-    backgroundLight: '#F5F7FA', // Slightly lighter
-    backgroundCard: '#FFFFFF',  // Used for cards
-    surface: '#FFFFFF',        // Pure white surface
+    // ─── Background (Dark theme from Stitch design) ─────────
+    background: '#0D0E1A',     // Deep dark navy
+    backgroundLight: '#13141F', // Slightly lighter dark
+    backgroundCard: '#1A1B2E',  // Dark card
+    surface: '#1A1B2E',        // Card/surface
+    surfaceRaised: '#21233A',  // Elevated surface
 
     // ─── Text ───────────────────────────────────────────────
-    textPrimary: '#1A2340',    // Near-black/dark navy
-    textSecondary: '#5A6A8A',  // Slate grey
-    textMuted: '#9AA7C0',      // Muted slate
-    textAccent: '#5bb0fb',
+    textPrimary: '#FFFFFF',    // Pure white
+    textSecondary: '#9AA3C0',  // Muted blue-grey
+    textMuted: '#5A637A',      // Dim muted
+    textAccent: '#5BB0FB',
 
     // ─── Accent Colors ─────────────────────────────────────
-    accent: '#5bb0fb',         // Aligned with primary for consistency
+    accent: '#5BB0FB',
     success: '#00E676',
-    warning: '#F0B429',        // Used in Stitch link icon
+    warning: '#F0B429',
     error: '#FF5252',
-    online: '#4CAF50',
+    online: '#00E676',
 
     // ─── Chat Bubbles ──────────────────────────────────────
-    bubbleSent: '#5bb0fb',
-    bubbleReceived: '#F1F5F9',
+    bubbleSent: '#5BB0FB',
+    bubbleReceived: '#21233A',
     bubbleSentText: '#FFFFFF',
-    bubbleReceivedText: '#1A2340',
+    bubbleReceivedText: '#FFFFFF',
 
     // ─── UI Elements ───────────────────────────────────────
-    border: '#E2E8F0',
-    borderLight: 'rgba(26, 35, 64, 0.06)',
-    divider: 'rgba(26, 35, 64, 0.08)',
-    overlay: 'rgba(0, 0, 0, 0.5)',
-    inputBackground: '#F8FAFC',
+    border: 'rgba(91, 176, 251, 0.12)',
+    borderLight: 'rgba(255, 255, 255, 0.07)',
+    divider: 'rgba(255, 255, 255, 0.06)',
+    overlay: 'rgba(0, 0, 0, 0.75)',
+    inputBackground: '#13141F',
 
     // ─── Gradients ─────────────────────────────────────────
-    gradientPrimary: ['#5bb0fb', '#8cd4ff'],
-    gradientDark: ['#1A2340', '#5A6A8A'],
-    gradientCard: ['rgba(91, 176, 251, 0.1)', 'rgba(91, 176, 251, 0.02)'],
-    gradientMatch: ['#5bb0fb', '#8cd4ff'],
+    gradientPrimary: ['#5BB0FB', '#3A9DFA'],
+    gradientDark: ['#0D0E1A', '#1A1B2E'],
+    gradientCard: ['rgba(91, 176, 251, 0.08)', 'rgba(91, 176, 251, 0.01)'],
+    gradientMatch: ['#5BB0FB', '#82C8FC'],
 };
 
 export default colors;
