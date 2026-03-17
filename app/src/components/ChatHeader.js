@@ -10,7 +10,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Avatar from './Avatar';
-import { colors, typography, spacing, borderRadius } from '../theme';
+import { colors, typography, spacing, borderRadius, shadows } from '../theme';
 
 /**
  * ChatHeader — Full-width chat header matching the Stitch design.
